@@ -1,4 +1,6 @@
-class Invoice < ApplicationRecord
+class InvoiceSerializer
+  include JSONAPI::Serializer
+  attributes :status
   belongs_to :customer
   belongs_to :merchant
   has_many :transactions
