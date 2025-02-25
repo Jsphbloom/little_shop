@@ -1,7 +1,12 @@
 class Api::V1::ItemsController < ApplicationController
   def create
     item = Item.create(item_params)
-    render json: ItemSerializer.new(item)
+    render json: ItemSerializer.new(item), status: 201
+  rescue ActionController::ParameterMissing => exception
+    render json: {
+      message: exception.message,
+      errors: ["422"]
+    }, status: :unprocessable_entity
   end
 
   private
