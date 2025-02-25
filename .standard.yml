@@ -1,0 +1,4 @@
+plugins:
+  - standard-rails
+  - standard-rspec
+  - standard-thread_safety
