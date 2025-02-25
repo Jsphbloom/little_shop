@@ -1,8 +1,8 @@
 class Api::V1::ItemsController < ApplicationController
 
   def index
-    merchant_list = Merchant.all
-    render json: ItemSerializer.format_merchants(merchant_list)
+    item_list = Item.all
+    render json: ItemSerializer.format_items(item_list)
   end
 
   def create
