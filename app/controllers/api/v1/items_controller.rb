@@ -9,6 +9,19 @@ class Api::V1::ItemsController < ApplicationController
     }, status: :unprocessable_entity
   end
 
+  def update
+    item = Item.find(params[:id])
+    if (item_params[:merchant_id] && Merchant.find(item_params[:merchant_id])) || !item_params[:merchant_id]
+      item.update(item_params)
+      render json: ItemSerializer.new(item)
+    else
+      render json: {
+        message: "Merchant not found",
+        errors: ["404"]
+      }, status: 404
+    end
+  end
+
   private
 
   def item_params
