@@ -1,12 +1,18 @@
 class Api::V1::ItemsController < ApplicationController
   def create
     item = Item.create(item_params)
-    render json: ItemSerializer.new(item), status: 201
-  rescue ActionController::ParameterMissing => exception
-    render json: {
-      message: exception.message,
-      errors: ["422"]
-    }, status: :unprocessable_entity
+    render json: ItemSerializer.new(item)
+  end
+
+  # New destroy action: deletes the item record and returns 204 (or 404 if not found)
+  def destroy
+    item = Item.find_by(id: params[:id])
+    if item
+      item.destroy
+      head :no_content
+    else
+      head :not_found
+    end
   end
 
   private
