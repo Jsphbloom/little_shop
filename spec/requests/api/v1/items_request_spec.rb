@@ -1,5 +1,7 @@
 require "rails_helper"
 
+# bundle exec rspec spec/requests/api/v1/items_request_spec.rb
+
 RSpec.describe "Items API", type: :request do
   before do
     Merchant.destroy_all
@@ -37,7 +39,7 @@ RSpec.describe "Items API", type: :request do
 
       post "/api/v1/items", params: {
         item: {
-          name: "Dummy Item 1",
+          name: "Dummy Item 4",
           description: "Dummy description 1",
           unit_price: 10.0,
           merchant_id: merchant[:data][:id]
@@ -45,7 +47,7 @@ RSpec.describe "Items API", type: :request do
       }
       expect(response).to have_http_status(:created).or have_http_status(:ok)
       json = JSON.parse(response.body, symbolize_names: true)
-      expect(json[:data][:attributes][:name]).to eq("Dummy Item 1")
+      expect(json[:data][:attributes][:name]).to eq("Dummy Item 4")
     end
   end
 

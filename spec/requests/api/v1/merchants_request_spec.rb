@@ -1,5 +1,4 @@
 require "rails_helper"
-require "pry"
 
 RSpec.describe "Merchants API", type: :request do
   before do
@@ -13,7 +12,6 @@ RSpec.describe "Merchants API", type: :request do
   describe "POST /api/v1/merchants" do
     it "creates a new merchant using the endpoint" do
       post "/api/v1/merchants", params: {merchant: {name: "Dummy Merchant 4"}}
-      # binding.pry  # Pause to inspect the response & Merchant state.
       expect(response).to have_http_status(:created).or have_http_status(:ok)
       json = JSON.parse(response.body, symbolize_names: true)
       expect(json[:data][:attributes][:name]).to eq("Dummy Merchant 4")
@@ -24,7 +22,6 @@ RSpec.describe "Merchants API", type: :request do
     it "deletes an existing merchant created in the before block" do
       # Use sMerchant1 created in before block
       delete "/api/v1/merchants/#{@sMerchant1.id}"
-      # binding.pry  # Pause to inspect the merchant before deletion
       expect(response).to have_http_status(:no_content)
       expect(Merchant.find_by(id: @sMerchant1.id)).to be_nil
     end
