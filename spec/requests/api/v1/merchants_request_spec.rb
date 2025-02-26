@@ -16,13 +16,35 @@ RSpec.describe "Merchants API", type: :request do
 
   describe "GET /api/v1/merchants" do
     it "can return an index of merchants" do
-
       get "/api/v1/merchants"
-      
       expect(response).to be_successful
       
       response_data = parsed_response
       
+      expect(response_data[:data].count).to eq(3)
+      expect(response_data[:data][0][:attributes][:name]).to eq("Dummy Merchant 1")
+      expect(response_data[:data][1][:attributes][:name]).to eq("Dummy Merchant 2")
+      expect(response_data[:data][2][:attributes][:name]).to eq("Dummy Merchant 3")
+    end
+
+    it "can sort merchants by oldest to newest" do
+      get "/api/v1/merchants?sort=desc"
+      expect(response).to be_successful
+      
+      response_data = parsed_response
+
+      expect(response_data[:data].count).to eq(3)
+      expect(response_data[:data][0][:attributes][:name]).to eq("Dummy Merchant 3")
+      expect(response_data[:data][1][:attributes][:name]).to eq("Dummy Merchant 2")
+      expect(response_data[:data][2][:attributes][:name]).to eq("Dummy Merchant 1")
+    end
+
+    it "can sort merchants by newest to oldest" do
+      get "/api/v1/merchants?sort=asc"
+      expect(response).to be_successful
+      
+      response_data = parsed_response
+
       expect(response_data[:data].count).to eq(3)
       expect(response_data[:data][0][:attributes][:name]).to eq("Dummy Merchant 1")
       expect(response_data[:data][1][:attributes][:name]).to eq("Dummy Merchant 2")
