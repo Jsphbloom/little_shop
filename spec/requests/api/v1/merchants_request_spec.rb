@@ -1,5 +1,5 @@
 require "rails_helper"
-#test by running rspec spec/requests/api/v1/merchants_request_spec.rb
+# rspec spec/requests/api/v1/merchants_request_spec.rb
 
 RSpec.describe "Merchants API", type: :request do
   describe "DELETE /api/v1/merchants/:id" do
