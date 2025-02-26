@@ -1,9 +1,11 @@
 class Api::V1::MerchantsController < ApplicationController
   def create
     merchant = Merchant.create(merchant_params)
-    render json: MerchantSerializer.new(merchant)
+    render json: MerchantSerializer.new(merchant), status: 201
+  rescue ActionController::ParameterMissing => exception
+    render json: {message: exception.message, errors: ["422"]}, status: :unprocessable_entity
   end
-  
+
   def destroy
     merchant = Merchant.find_by(id: params[:id])
     if merchant
