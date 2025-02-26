@@ -1,6 +1,4 @@
 class InvoiceItemSerializer
   include JSONAPI::Serializer
-  attributes :quantity, :unit_price
-  belongs_to :invoice
-  belongs_to :item
+  attributes :item_id, :invoice_id, :quantity, :unit_price
 end
