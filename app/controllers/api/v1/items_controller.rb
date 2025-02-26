@@ -4,7 +4,6 @@ class Api::V1::ItemsController < ApplicationController
     render json: ItemSerializer.new(item)
   end
 
-  # New destroy action: deletes the item record and returns 204 (or 404 if not found)
   def destroy
     item = Item.find_by(id: params[:id])
     if item
