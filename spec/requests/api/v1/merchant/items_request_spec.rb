@@ -39,16 +39,16 @@ RSpec.describe "Merchant Items API", type: :request do
         attributes = item[:attributes]
 
         expect(attributes).to have_key(:name)
-        expect(item[:name]).to be_a(String)
+        expect(attributes[:name]).to be_a(String)
 
         expect(attributes).to have_key(:description)
-        expect(item[:description]).to be_a(String)
+        expect(attributes[:description]).to be_a(String)
 
         expect(attributes).to have_key(:unit_price)
-        expect(item[:unit_price]).to be_a(Float)
+        expect(attributes[:unit_price]).to be_a(Float)
 
         expect(attributes).to have_key(:merchant_id)
-        expect(item[:merchant_id]).to eq(merchant.id)
+        expect(attributes[:merchant_id]).to eq(merchant.id)
       end
     end
   end
