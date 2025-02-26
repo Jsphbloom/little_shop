@@ -9,6 +9,11 @@ class Api::V1::MerchantsController < ApplicationController
     }, status: :unprocessable_entity
   end
 
+  def show
+    merchant = Merchant.find(params[:id])
+    render json: MerchantSerializer.new(merchant)
+  end
+
   private
 
   def merchant_params

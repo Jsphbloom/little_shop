@@ -9,6 +9,11 @@ class Api::V1::ItemsController < ApplicationController
     }, status: :unprocessable_entity
   end
 
+  def show
+    item = Item.find(params[:id])
+    render json: ItemSerializer.new(item)
+  end
+
   private
 
   def item_params
