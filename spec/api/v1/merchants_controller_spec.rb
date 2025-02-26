@@ -40,12 +40,12 @@ describe "Merchants API", type: :request do
 
       expect(response).to be_successful
 
-      expect(created_merchant).to have_attributes(merchant_params)
+      expect(merchant).to have_attributes(merchant_params)
 
       response_data = parsed_response
 
       expect(response_data[:data]).to include(
-        id: created_merchant.id.to_s,
+        id: merchant.id.to_s,
         type: "merchant"
       )
 
