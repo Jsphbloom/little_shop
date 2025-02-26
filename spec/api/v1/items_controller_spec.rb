@@ -53,7 +53,7 @@ describe "Items API", type: :request do
       }
       headers = {"CONTENT_TYPE" => "application/json"}
 
-      patch "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: item_params)
+      put "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: item_params)
 
       expect(response).to be_successful
 
@@ -97,7 +97,7 @@ describe "Items API", type: :request do
     it "will gracefully handle update if params aren't provided" do
       item = create(:item)
 
-      patch "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: {})
+      put "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: {})
 
       expect(response).not_to be_successful
       expect(response.status).to eq(400).or eq(404)
