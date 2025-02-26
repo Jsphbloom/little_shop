@@ -2,7 +2,7 @@ class Api::V1::ItemsController < ApplicationController
 
   def index
     item_list = Item.all
-    render json: ItemSerializer.format_items(item_list)
+    render json: ItemSerializer.new(item_list)
   end
 
   def create

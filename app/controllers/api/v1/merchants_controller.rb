@@ -2,7 +2,7 @@ class Api::V1::MerchantsController < ApplicationController
 
   def index
     merchant_list = Merchant.all
-    render json: MerchantSerializer.format_merchants(merchant_list)
+    render json: MerchantSerializer.new(merchant_list)
   end
 
   def create
