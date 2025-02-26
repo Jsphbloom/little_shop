@@ -1,4 +1,5 @@
 require "rails_helper"
+# bundle exec rspec spec/requests/api/v1/merchants_request_spec.rb
 
 RSpec.describe "Merchants API", type: :request do
   before do
