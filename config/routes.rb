@@ -18,4 +18,13 @@ Rails.application.routes.draw do
   patch "/api/v1/merchants/:id", to: "api/v1/merchants#update"
   delete "/api/v1/items/:id", to: "api/v1/items#destroy"
   delete "/api/v1/merchants/:id", to: "api/v1/merchants#destroy"
+
+  # New route for merchant customers endpoint
+  get "/api/v1/merchants/:merchant_id/customers", to: "api/v1/merchants/customers#index"
+  #get is the HTTP verb
+  #/api/v1/ is the namespace
+  # :merchants_id is a dynamic segment. It will be replaced with the actual id of the merchant
+  # a dynamic segment is a placeholder for a value that will be provided at runtime
+  # customers is the controller
+  # index is the action, which is the method in the controller that will be called
 end
