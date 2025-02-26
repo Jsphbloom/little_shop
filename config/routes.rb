@@ -10,4 +10,7 @@ Rails.application.routes.draw do
 
   post "/api/v1/items", to: "api/v1/items#create"
   post "/api/v1/merchants", to: "api/v1/merchants#create"
+
+  delete "/api/v1/items/:id", to: "api/v1/items#destroy"
+  delete "/api/v1/merchants/:id", to: "api/v1/merchants#destroy"
 end
