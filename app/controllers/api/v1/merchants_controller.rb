@@ -1,4 +1,10 @@
 class Api::V1::MerchantsController < ApplicationController
+
+  def index
+    merchant_list = Merchant.all
+    render json: MerchantSerializer.new(merchant_list)
+  end
+
   def create
     merchant = Merchant.create(merchant_params)
     render json: MerchantSerializer.new(merchant), status: 201

@@ -1,4 +1,10 @@
 class Api::V1::ItemsController < ApplicationController
+
+  def index
+    item_list = Item.all
+    render json: ItemSerializer.new(item_list)
+  end
+
   def create
     item = Item.create(item_params)
     render json: ItemSerializer.new(item), status: 201
