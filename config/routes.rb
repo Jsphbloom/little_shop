@@ -10,5 +10,6 @@ Rails.application.routes.draw do
 
   post "/api/v1/items", to: "api/v1/items#create"
   post "/api/v1/merchants", to: "api/v1/merchants#create"
+  patch "/api/v1/items/:id", to: "api/v1/items#update"
   patch "/api/v1/merchants/:id", to: "api/v1/merchants#update"
 end
