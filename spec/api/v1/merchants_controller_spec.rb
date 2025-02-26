@@ -33,12 +33,16 @@ describe "Merchants API", type: :request do
     it "can update an existing merchant" do
       merchant = create(:merchant)
 
-      merchant_params = {name: Faker::Commerce.vendor}
+      new_name = Faker::Commerce.vendor until new_name != merchant.name && new_name
+
+      merchant_params = {name: new_name}
       headers = {"CONTENT_TYPE" => "application/json"}
 
       patch "/api/v1/merchants/#{merchant.id}", headers: headers, params: JSON.generate(merchant: merchant_params)
 
       expect(response).to be_successful
+
+      merchant = Merchant.find(merchant.id)
 
       expect(merchant).to have_attributes(merchant_params)
 
@@ -50,7 +54,7 @@ describe "Merchants API", type: :request do
       )
 
       expect(response_data[:data][:attributes]).to include(merchant_params)
-      expect(merchant.name).to eq(merchant_params[:name])
+      expect(merchant.name).to eq(new_name)
     end
   end
 
