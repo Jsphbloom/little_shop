@@ -1,6 +1,14 @@
 class Api::V1::MerchantsController < ApplicationController
   def index
-    merchant_list = Merchant.all
+    
+    if params[:sort] == "desc"
+      merchant_list = Merchant.sort_by_desc
+    elsif params[:sort] == "asc"
+      merchant_list = Merchant.sort_by_asc
+    else
+      merchant_list = Merchant.all
+    end
+    
     render json: MerchantSerializer.new(merchant_list)
   end
 
