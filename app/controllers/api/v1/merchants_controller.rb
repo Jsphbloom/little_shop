@@ -3,6 +3,15 @@ class Api::V1::MerchantsController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
   def index
     merchant_list = Merchant.all
+
+    if params[:status].present? && params[:status] == "returned"
+      merchant_list = Merchant.with_returned_items
+    end
+
+    if params[:sort].present?
+      merchant_list = merchant_list.sort_by(params[:sort])
+    end
+
     render json: MerchantSerializer.new(merchant_list)
   end
 
