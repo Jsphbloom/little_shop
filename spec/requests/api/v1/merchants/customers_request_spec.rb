@@ -1,5 +1,4 @@
 require "rails_helper"
-# bundle exec rspec spec/requests/api/v1/merchants_customers_request_spec.rb
 
 RSpec.describe "Merchant Customers API", type: :request do
   before do
@@ -22,6 +21,8 @@ RSpec.describe "Merchant Customers API", type: :request do
       get "/api/v1/merchants/#{@merchant.id}/customers"
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body, symbolize_names: true)
+
+      # Ensure the JSON response always contains a "data" key with an array value.
       expect(json_response).to have_key(:data)
       expect(json_response[:data]).to be_an(Array)
       json_response[:data].each do |customer|
