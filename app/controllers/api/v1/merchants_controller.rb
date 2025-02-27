@@ -6,10 +6,8 @@ class Api::V1::MerchantsController < ApplicationController
       merchant_list = Merchant.with_returned_items
     end
 
-    if params[:sort] == "desc"
-      merchant_list = merchant_list.order(created_at: :desc)
-    elsif params[:sort] == "asc"
-      merchant_list = merchant_list.order(created_at: :asc)
+    if params[:sort].present?
+      merchant_list = merchant_list.sort_by(params[:sort])
     end
 
     render json: MerchantSerializer.new(merchant_list)
