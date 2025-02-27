@@ -80,6 +80,11 @@ RSpec.describe "Merchants API", type: :request do
       expect(response_data[:data][1][:attributes][:name]).to eq("Dummy Merchant 2")
       expect(response_data[:data][2][:attributes][:name]).to eq("Dummy Merchant 3")
     end
+
+    it "successfully get merchants with invoice status of returned" do
+      get "/api/v1/merchants?status=returned"
+      expect(response).to be_successful
+    end
   end
 
   describe "POST /api/v1/merchants" do
