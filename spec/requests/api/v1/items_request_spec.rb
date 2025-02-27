@@ -136,7 +136,7 @@ RSpec.describe "Items API", type: :request do
       put "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: {})
 
       expect(response).not_to be_successful
-      expect(response.status).to eq(400).or eq(404)
+      expect(response.status).to eq(422)
     end
 
     it "will gracefully handle update with invalid merchant id" do
@@ -145,7 +145,7 @@ RSpec.describe "Items API", type: :request do
       put "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: {merchant_id: 999999999999})
 
       expect(response).not_to be_successful
-      expect(response.status).to eq(400).or eq(404)
+      expect(response.status).to eq(422)
     end
   end
 end
