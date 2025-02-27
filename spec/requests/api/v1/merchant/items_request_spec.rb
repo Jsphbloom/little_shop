@@ -1,4 +1,5 @@
 require "rails_helper"
+# to run test: bundle exec rspec spec/requests/api/v1/merchant/items_request_spec.rb
 
 RSpec.describe "Merchant Items API", type: :request do
   let(:merchant) { create(:merchant) }
