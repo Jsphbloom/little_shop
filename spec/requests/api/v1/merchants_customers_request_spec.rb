@@ -22,7 +22,6 @@ RSpec.describe "Merchant Customers API", type: :request do
       get "/api/v1/merchants/#{@merchant.id}/customers"
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body, symbolize_names: true)
-      binding.pry
       # Ensure the response matches JSONAPI structure:
       expect(json_response).to have_key(:data)
       expect(json_response[:data]).to be_an(Array)
@@ -33,7 +32,6 @@ RSpec.describe "Merchant Customers API", type: :request do
         expect(customer).to have_key(:attributes)
         expect(customer[:attributes]).to have_key(:first_name)
         expect(customer[:attributes]).to have_key(:last_name)
-        binding.pry 
       end
     end
   end
