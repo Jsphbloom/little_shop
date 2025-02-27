@@ -2,18 +2,19 @@ require "rails_helper"
 
 RSpec.describe "Merchant Customers API", type: :request do
   before do
+    # Clear existing data using factories if necessary.
     Merchant.destroy_all
     Customer.destroy_all
     Invoice.destroy_all
 
-    # Manually create a merchant and associated customers.
-    @merchant = Merchant.create!(name: "Test Merchant")
-    @customer1 = Customer.create!(first_name: "John", last_name: "Doe")
-    @customer2 = Customer.create!(first_name: "Jane", last_name: "Smith")
+    # Create a merchant and associated customers using FactoryBot.
+    @merchant = create(:merchant, name: "Test Merchant")
+    @customer1 = create(:customer, first_name: "John", last_name: "Doe")
+    @customer2 = create(:customer, first_name: "Jane", last_name: "Smith")
 
     # Associate customers with the merchant via invoices.
-    Invoice.create!(merchant: @merchant, customer: @customer1)
-    Invoice.create!(merchant: @merchant, customer: @customer2)
+    create(:invoice, merchant: @merchant, customer: @customer1)
+    create(:invoice, merchant: @merchant, customer: @customer2)
   end
 
   describe "GET /api/v1/merchants/:merchant_id/customers" do
@@ -22,7 +23,7 @@ RSpec.describe "Merchant Customers API", type: :request do
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body, symbolize_names: true)
 
-      # Ensure the JSON response always contains a "data" key with an array value.
+      # Verify the JSONAPI structure.
       expect(json_response).to have_key(:data)
       expect(json_response[:data]).to be_an(Array)
       json_response[:data].each do |customer|
