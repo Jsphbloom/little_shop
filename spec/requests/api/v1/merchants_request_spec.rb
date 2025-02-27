@@ -14,6 +14,37 @@ RSpec.describe "Merchants API", type: :request do
     JSON.parse(response.body, symbolize_names: true)
   end
 
+  describe "GET /api/v1/merchants" do 
+    it "can return a single merchant by id" do 
+      merchant = create(:merchant)
+
+      get "/api/v1/merchants/#{merchant.id}"
+
+      expect(response).to be_successful
+      expect(response.status).to eq(200)
+
+      response_data = parsed_response
+
+      expect(response_data[:data]).to include(
+        id: merchant.id.to_s,
+        type: "merchant" 
+      )
+
+      expect(response_data[:data][:attributes]).to include(
+        name: merchant.name
+      )
+    end
+
+    it "returns a 404 if the merchant is not found" do
+      get "/api/v1/merchants/0"
+
+      expect(response).to have_http_status(:not_found)
+
+      response_data = parsed_response
+      expect(response_data[:error]).to eq("Merchant not found")
+    end
+  end
+  
   describe "GET /api/v1/merchants" do
     it "can return an index of merchants" do
       get "/api/v1/merchants"

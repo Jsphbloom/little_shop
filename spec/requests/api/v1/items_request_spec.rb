@@ -34,6 +34,38 @@ RSpec.describe "Items API", type: :request do
   def parsed_response
     JSON.parse(response.body, symbolize_names: true)
   end
+  
+  describe "GET /api/v1/items/:id" do 
+    it "can fetch a single existing item by id" do 
+      item = create(:item)
+      get "/api/v1/items/#{item.id}"
+
+      expect(response).to be_successful
+      expect(response.status).to eq(200)
+
+      response_data = parsed_response
+
+      expect(response_data[:data]).to include(
+        id: item.id.to_s,
+        type: "item"
+      )
+
+      expect(response_data[:data][:attributes]).to include(
+        name: item.name,
+        description: item.description,
+        unit_price: item.unit_price
+      )
+    end
+
+    it "returns a 404 if the item is not found" do
+      get "/api/v1/items/0"
+
+      expect(response).to have_http_status(:not_found)
+
+      response_data = parsed_response
+      expect(response_data[:error]).to eq("Item not found")
+    end
+  end
 
   describe "GET /api/v1/items" do
     it "can return an index of items" do
