@@ -105,7 +105,7 @@ RSpec.describe "Merchants API", type: :request do
       patch "/api/v1/merchants/#{merchant.id}", headers: headers, params: JSON.generate(merchant: {})
 
       expect(response).not_to be_successful
-      expect(response.status).to eq(400).or eq(404)
+      expect(response.status).to eq(422)
     end
   end
 end
