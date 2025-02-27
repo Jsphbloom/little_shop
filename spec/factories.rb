@@ -12,7 +12,7 @@ FactoryBot.define do
   end
 
   factory :invoice do
-    status { ["success", "refunded", "failed"].sample }
+    status { ["shipped", "returned", "packaged"].sample }
     customer
     merchant
   end
