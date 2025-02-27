@@ -1,5 +1,7 @@
 require "rails_helper"
 
+# bundle exec rspec spec/requests/api/v1/merchants_customers_request_spec.rb
+
 RSpec.describe "Merchant Customers API", type: :request do
   before do
     Merchant.destroy_all
@@ -9,20 +11,26 @@ RSpec.describe "Merchant Customers API", type: :request do
     @merchant = Merchant.create!(name: "Test Merchant")
     @customer1 = Customer.create!(first_name: "John", last_name: "Doe")
     @customer2 = Customer.create!(first_name: "Jane", last_name: "Smith")
-    # Assume invoices are needed for association: Invoice belongs_to merchant and customer.
-    Invoice.create!(merchant: @merchant, customer: @customer1, status: "pending")
-    Invoice.create!(merchant: @merchant, customer: @customer2, status: "pending")
+    Invoice.create!(merchant: @merchant, customer: @customer1)
+    Invoice.create!(merchant: @merchant, customer: @customer2)
   end
 
   describe "GET /api/v1/merchants/:merchant_id/customers" do
-    it "returns a list of customers for the merchant" do
+    it "returns a list of customers for the merchant in JSONAPI format" do
       get "/api/v1/merchants/#{@merchant.id}/customers"
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body, symbolize_names: true)
+      # Ensure the response matches JSONAPI structure:
+      expect(json_response).to have_key(:data)
       expect(json_response[:data]).to be_an(Array)
-      # Checks that the response contains customer attributes
-      expect(json_response[:data].first[:attributes]).to have_key(:first_name)
-      expect(json_response[:data].first[:attributes]).to have_key(:last_name)
+      json_response[:data].each do |customer|
+        expect(customer).to have_key(:id)
+        expect(customer).to have_key(:type)
+        expect(customer[:type]).to eq("customer")
+        expect(customer).to have_key(:attributes)
+        expect(customer[:attributes]).to have_key(:first_name)
+        expect(customer[:attributes]).to have_key(:last_name)
+      end
     end
   end
 end
