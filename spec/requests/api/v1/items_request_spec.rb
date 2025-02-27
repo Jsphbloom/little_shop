@@ -7,7 +7,6 @@ RSpec.describe "Items API", type: :request do
 
   describe "POST /api/v1/items" do
     it "creates a new item" do
-      # Create a merchant via FactoryBot
       merchant = create(:merchant)
       item_params = {
         name: Faker::Commerce.product_name,

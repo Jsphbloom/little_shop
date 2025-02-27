@@ -2,15 +2,15 @@ require "rails_helper"
 
 RSpec.describe "Merchant Customers API", type: :request do
   before do
-    # Clear existing data using factories if necessary.
+    # Clear existing data.
     Merchant.destroy_all
     Customer.destroy_all
     Invoice.destroy_all
 
-    # Create a merchant and associated customers using FactoryBot.
-    @merchant = create(:merchant, name: "Test Merchant")
-    @customer1 = create(:customer, first_name: "John", last_name: "Doe")
-    @customer2 = create(:customer, first_name: "Jane", last_name: "Smith")
+    # Create a merchant and associated customers using FactoryBot and Faker.
+    @merchant = create(:merchant, name: Faker::Company.name)
+    @customer1 = create(:customer, first_name: Faker::Name.first_name, last_name: Faker::Name.last_name)
+    @customer2 = create(:customer, first_name: Faker::Name.first_name, last_name: Faker::Name.last_name)
 
     # Associate customers with the merchant via invoices.
     create(:invoice, merchant: @merchant, customer: @customer1)
