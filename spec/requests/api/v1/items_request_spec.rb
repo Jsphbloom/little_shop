@@ -67,6 +67,28 @@ RSpec.describe "Items API", type: :request do
     end
   end
 
+  describe "GET /api/v1/items" do
+    it "can return an index of items" do
+
+      get "/api/v1/items"
+      
+      expect(response).to be_successful
+      
+      response_data = parsed_response
+
+      expect(response_data[:data].count).to eq(3)
+
+      expect(response_data[:data][0][:attributes][:name]).to eq("Dummy Item 1")
+      expect(response_data[:data][0][:attributes][:merchant_id]).to eq(@sMerchant1.id)
+
+      expect(response_data[:data][1][:attributes][:name]).to eq("Dummy Item 2")
+      expect(response_data[:data][1][:attributes][:merchant_id]).to eq(@sMerchant2.id)
+
+      expect(response_data[:data][2][:attributes][:name]).to eq("Dummy Item 3")
+      expect(response_data[:data][2][:attributes][:merchant_id]).to eq(@sMerchant3.id)
+    end
+  end
+
   describe "create" do
     it "POST /api/v1/items/" do
       item_params = {
@@ -168,7 +190,7 @@ RSpec.describe "Items API", type: :request do
       put "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: {})
 
       expect(response).not_to be_successful
-      expect(response.status).to eq(400).or eq(404)
+      expect(response.status).to eq(422)
     end
 
     it "will gracefully handle update with invalid merchant id" do
@@ -177,7 +199,7 @@ RSpec.describe "Items API", type: :request do
       put "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: {merchant_id: 999999999999})
 
       expect(response).not_to be_successful
-      expect(response.status).to eq(400).or eq(404)
+      expect(response.status).to eq(422)
     end
   end
 end

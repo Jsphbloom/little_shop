@@ -1,4 +1,6 @@
 class Api::V1::ItemsController < ApplicationController
+  rescue_from ActionController::ParameterMissing, with: :unprocessable_entity_response
+  rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
   def index
     item_list = Item.all
     render json: ItemSerializer.new(item_list)
@@ -12,13 +14,11 @@ class Api::V1::ItemsController < ApplicationController
   def create
     item = Item.create(item_params)
     render json: ItemSerializer.new(item), status: 201
-  rescue ActionController::ParameterMissing => exception
-    render json: {message: exception.message, errors: ["422"]}, status: :unprocessable_entity
   end
 
   def update
+    raise ActiveRecord::RecordNotFound if params[:merchant_id].present? && !Merchant.find(params[:merchant_id])
     item = Item.find(params[:id])
-    return if params[:merchant_id] && !Merchant.find(params[:merchant_id])
     item.update(item_params)
     render json: ItemSerializer.new(item)
   end
@@ -37,5 +37,13 @@ class Api::V1::ItemsController < ApplicationController
 
   def item_params
     params.require(:item).permit(:name, :description, :unit_price, :merchant_id)
+  end
+
+  def unprocessable_entity_response(e)
+    render json: ErrorSerializer.format_error(e, "422"), status: :unprocessable_entity
+  end
+
+  def not_found_response(e)
+    render json: ErrorSerializer.format_error(e, "404"), status: :not_found
   end
 end
