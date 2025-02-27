@@ -3,15 +3,9 @@ class Merchant < ApplicationRecord
   has_many :invoices, dependent: :destroy
   has_many :items, dependent: :destroy
 
-  # def self.sort_by_asc
-  #   Merchant.all.order(created_at: :asc)
-  # end
-
-  # def self.sort_by_desc
-  #   Merchant.all.order(created_at: :desc)
-  # end
-
-  def self.sort_by(direction)
-    Merchant.all.order(created_at: direction.to_sym)
+  def self.with_returned_items
+    joins(:invoices)
+      .where(invoices: { status: "returned" })
+      .distinct
   end
 end

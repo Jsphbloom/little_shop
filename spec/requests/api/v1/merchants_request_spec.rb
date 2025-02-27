@@ -20,7 +20,6 @@ RSpec.describe "Merchants API", type: :request do
       expect(response).to be_successful
       
       response_data = parsed_response
-      
       expect(response_data[:data].count).to eq(3)
       expect(response_data[:data][0][:attributes][:name]).to eq("Dummy Merchant 1")
       expect(response_data[:data][1][:attributes][:name]).to eq("Dummy Merchant 2")
