@@ -1,13 +1,11 @@
 require "rails_helper"
-# bundle exec rspec spec/requests/api/v1/merchants_request_spec.rb
 
 RSpec.describe "Merchants API", type: :request do
   before do
     Merchant.destroy_all
-    # Create dummy merchants with "s" prefix as instance variables
-    @sMerchant1 = Merchant.create!(name: "Dummy Merchant 1")
-    @sMerchant2 = Merchant.create!(name: "Dummy Merchant 2")
-    @sMerchant3 = Merchant.create!(name: "Dummy Merchant 3")
+    @sMerchant3 = create(:merchant, name: "Merchant 3", created_at: 3.days.ago)
+    @sMerchant2 = create(:merchant, name: "Merchant 2", created_at: 2.days.ago)
+    @sMerchant1 = create(:merchant, name: "Merchant 1", created_at: 1.day.ago)
   end
 
   def parsed_response
@@ -77,40 +75,40 @@ RSpec.describe "Merchants API", type: :request do
     end
   end
 
-  describe "GET /api/v1/merchant" do
+  describe "GET /api/v1/merchants" do
     it "can return an index of merchants" do
       get "/api/v1/merchants"
       expect(response).to be_successful
 
       response_data = parsed_response
       expect(response_data[:data].count).to eq(3)
-      expect(response_data[:data][0][:attributes][:name]).to eq("Dummy Merchant 1")
-      expect(response_data[:data][1][:attributes][:name]).to eq("Dummy Merchant 2")
-      expect(response_data[:data][2][:attributes][:name]).to eq("Dummy Merchant 3")
+      expect(response_data[:data][0][:attributes][:name]).to eq(@sMerchant3.name)
+      expect(response_data[:data][1][:attributes][:name]).to eq(@sMerchant2.name)
+      expect(response_data[:data][2][:attributes][:name]).to eq(@sMerchant1.name)
     end
 
     it "can sort merchants by oldest to newest" do
-      get "/api/v1/merchants?sort=desc"
-      expect(response).to be_successful
-
-      response_data = parsed_response
-
-      expect(response_data[:data].count).to eq(3)
-      expect(response_data[:data][0][:attributes][:name]).to eq("Dummy Merchant 3")
-      expect(response_data[:data][1][:attributes][:name]).to eq("Dummy Merchant 2")
-      expect(response_data[:data][2][:attributes][:name]).to eq("Dummy Merchant 1")
-    end
-
-    it "can sort merchants by newest to oldest" do
       get "/api/v1/merchants?sort=asc"
       expect(response).to be_successful
 
       response_data = parsed_response
 
       expect(response_data[:data].count).to eq(3)
-      expect(response_data[:data][0][:attributes][:name]).to eq("Dummy Merchant 1")
-      expect(response_data[:data][1][:attributes][:name]).to eq("Dummy Merchant 2")
-      expect(response_data[:data][2][:attributes][:name]).to eq("Dummy Merchant 3")
+      expect(response_data[:data][0][:attributes][:name]).to eq(@sMerchant3.name)
+      expect(response_data[:data][1][:attributes][:name]).to eq(@sMerchant2.name)
+      expect(response_data[:data][2][:attributes][:name]).to eq(@sMerchant1.name)
+    end
+
+    it "can sort merchants by newest to oldest" do
+      get "/api/v1/merchants?sort=desc"
+      expect(response).to be_successful
+
+      response_data = parsed_response
+
+      expect(response_data[:data].count).to eq(3)
+      expect(response_data[:data][0][:attributes][:name]).to eq(@sMerchant1.name)
+      expect(response_data[:data][1][:attributes][:name]).to eq(@sMerchant2.name)
+      expect(response_data[:data][2][:attributes][:name]).to eq(@sMerchant3.name)
     end
   end
 

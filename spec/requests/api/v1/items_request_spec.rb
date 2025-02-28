@@ -1,42 +1,34 @@
 require "rails_helper"
-
-# bundle exec rspec spec/requests/api/v1/items_request_spec.rb
-
 RSpec.describe "Items API", type: :request do
   before do
     Merchant.destroy_all
     Item.destroy_all
-    # Create dummy merchants for association with "s" prefix
-    @sMerchant1 = Merchant.create!(name: "Dummy Merchant 1")
-    @sMerchant2 = Merchant.create!(name: "Dummy Merchant 2")
-    @sMerchant3 = Merchant.create!(name: "Dummy Merchant 3")
-    # Create dummy items for DELETE testing
-    @sItem1 = Item.create!(
-      name: "Dummy Item 1",
-      description: "Dummy description 1",
-      unit_price: 10.0,
-      merchant: @sMerchant1
-    )
-    Item.create!(
-      name: "Dummy Item 2",
-      description: "Dummy description 2",
-      unit_price: 20.0,
-      merchant: @sMerchant2
-    )
-    Item.create!(
-      name: "Dummy Item 3",
-      description: "Dummy description 3",
-      unit_price: 30.0,
-      merchant: @sMerchant3
-    )
+    @sMerchant1 = create(:merchant, name: Faker::Company.unique.name)
+    @sMerchant2 = create(:merchant, name: Faker::Company.unique.name)
+    @sMerchant3 = create(:merchant, name: Faker::Company.unique.name)
+    @sItem1 = create(:item,
+      name: Faker::Commerce.product_name,
+      description: Faker::Commerce.material,
+      unit_price: Faker::Commerce.price,
+      merchant: @sMerchant1)
+    @sItem2 = create(:item,
+      name: Faker::Commerce.product_name,
+      description: Faker::Commerce.material,
+      unit_price: Faker::Commerce.price,
+      merchant: @sMerchant2)
+    @sItem3 = create(:item,
+      name: Faker::Commerce.product_name,
+      description: Faker::Commerce.material,
+      unit_price: Faker::Commerce.price,
+      merchant: @sMerchant3)
   end
 
   def parsed_response
     JSON.parse(response.body, symbolize_names: true)
   end
-  
-  describe "GET /api/v1/items/:id" do 
-    it "can fetch a single existing item by id" do 
+
+  describe "GET /api/v1/items/:id" do
+    it "can fetch a single existing item by id" do
       item = create(:item)
       get "/api/v1/items/#{item.id}"
 
@@ -69,22 +61,18 @@ RSpec.describe "Items API", type: :request do
 
   describe "GET /api/v1/items" do
     it "can return an index of items" do
-
       get "/api/v1/items"
-      
+
       expect(response).to be_successful
-      
+
       response_data = parsed_response
 
       expect(response_data[:data].count).to eq(3)
-
-      expect(response_data[:data][0][:attributes][:name]).to eq("Dummy Item 1")
+      expect(response_data[:data][0][:attributes][:name]).to eq(@sItem1.name)
       expect(response_data[:data][0][:attributes][:merchant_id]).to eq(@sMerchant1.id)
-
-      expect(response_data[:data][1][:attributes][:name]).to eq("Dummy Item 2")
+      expect(response_data[:data][1][:attributes][:name]).to eq(@sItem2.name)
       expect(response_data[:data][1][:attributes][:merchant_id]).to eq(@sMerchant2.id)
-
-      expect(response_data[:data][2][:attributes][:name]).to eq("Dummy Item 3")
+      expect(response_data[:data][2][:attributes][:name]).to eq(@sItem3.name)
       expect(response_data[:data][2][:attributes][:merchant_id]).to eq(@sMerchant3.id)
     end
   end

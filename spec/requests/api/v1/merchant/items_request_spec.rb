@@ -1,5 +1,4 @@
 require "rails_helper"
-
 RSpec.describe "Merchant Items API", type: :request do
   let(:merchant) { create(:merchant) }
 
