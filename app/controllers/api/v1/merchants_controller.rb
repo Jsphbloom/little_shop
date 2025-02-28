@@ -12,14 +12,13 @@ class Api::V1::MerchantsController < ApplicationController
       merchant_list = Merchant.with_returned_items
     end
 
-    if params[:sort].present?
-      if params[:sort] == "asc"
-        merchant_list = merchant_list.sort_by { |m| m.created_at }
-      elsif params[:sort] == "desc"
-        merchant_list = merchant_list.sort_by { |m| m.created_at }.reverse
-      end
+    if params[:sorted] == "age"
+      merchant_list = merchant_list.sort_by_age
     end
 
+    if params[:count].present? && params[:count] == "true"
+      merchant_list = merchant_list.with_item_count
+    end
     render json: MerchantSerializer.new(merchant_list)
   end
 

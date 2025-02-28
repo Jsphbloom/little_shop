@@ -7,6 +7,11 @@ class Api::V1::ItemsController < ApplicationController
 
   def index
     item_list = Item.all
+
+    if params[:sorted] == "price"
+      item_list = Item.sort_by_price
+    end
+
     render json: ItemSerializer.new(item_list)
   end
 
