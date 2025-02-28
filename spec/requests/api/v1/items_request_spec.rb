@@ -75,6 +75,24 @@ RSpec.describe "Items API", type: :request do
       expect(response_data[:data][2][:attributes][:name]).to eq(@sItem3.name)
       expect(response_data[:data][2][:attributes][:merchant_id]).to eq(@sMerchant3.id)
     end
+
+    it "can sort items by price" do
+      @sItem4 = Item.create!(
+      name: "Dummy Item 4",
+      description: "Dummy description 4",
+      unit_price: 1.0,
+      merchant: @sMerchant1
+    )
+      get "/api/v1/items?sorted=price"
+      expect(response).to be_successful
+      
+      response_data = parsed_response
+
+      expect(response_data[:data].count).to eq(4)
+      expect(response_data[:data][0][:attributes][:name]).to eq("Dummy Item 4")
+      expect(response_data[:data][1][:attributes][:name]).to eq("Dummy Item 1")
+      expect(response_data[:data][2][:attributes][:name]).to eq("Dummy Item 2")
+    end
   end
 
   describe "create" do

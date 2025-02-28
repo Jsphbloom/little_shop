@@ -55,8 +55,8 @@ RSpec.describe "Merchants API", type: :request do
       expect(response_data[:data][2][:attributes][:name]).to eq(@sMerchant1.name)
     end
 
-    it "can sort merchants by oldest to newest" do
-      get "/api/v1/merchants?sort=asc"
+    it "can sort merchants by newest to oldest" do
+      get "/api/v1/merchants?sorted=age"
       expect(response).to be_successful
 
       response_data = parsed_response
@@ -67,16 +67,9 @@ RSpec.describe "Merchants API", type: :request do
       expect(response_data[:data][2][:attributes][:name]).to eq(@sMerchant1.name)
     end
 
-    it "can sort merchants by newest to oldest" do
-      get "/api/v1/merchants?sort=desc"
+    it "successfully get merchants with invoice status of returned" do
+      get "/api/v1/merchants?status=returned"
       expect(response).to be_successful
-
-      response_data = parsed_response
-
-      expect(response_data[:data].count).to eq(3)
-      expect(response_data[:data][0][:attributes][:name]).to eq(@sMerchant1.name)
-      expect(response_data[:data][1][:attributes][:name]).to eq(@sMerchant2.name)
-      expect(response_data[:data][2][:attributes][:name]).to eq(@sMerchant3.name)
     end
   end
 

@@ -4,4 +4,9 @@ class Item < ApplicationRecord
   validates :unit_price, presence: true
   has_many :invoice_items
   belongs_to :merchant
+
+  def self.sort_by_price
+    Item.order(unit_price: :asc)
+  end
+
 end
