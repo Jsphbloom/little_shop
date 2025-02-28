@@ -16,9 +16,12 @@ class Api::V1::MerchantsController < ApplicationController
   end
 
   def show
-    merchant = Merchant.find(params[:id])
+    if params[:name].present? 
+      merchant = Merchant.find_by_name_fragment(params[:name])
+    else
+      merchant = Merchant.find(params[:id])
+    end
     render json: MerchantSerializer.new(merchant)
-
   end
 
   def create
