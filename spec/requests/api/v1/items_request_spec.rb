@@ -56,7 +56,7 @@ RSpec.describe "Items API", type: :request do
       expect(response).to have_http_status(:not_found)
 
       response_data = parsed_response
-      expect(response_data[:error]).to eq("Item not found") #testfailed --
+      expect(response_data[:error]).to eq("Item not found")
     end
   end
 
