@@ -2,17 +2,14 @@ require "rails_helper"
 
 RSpec.describe "Merchant Customers API", type: :request do
   before do
-    # Clear existing data.
     Merchant.destroy_all
     Customer.destroy_all
     Invoice.destroy_all
 
-    # Create a merchant and associated customers using FactoryBot and Faker.
     @merchant = create(:merchant, name: Faker::Company.name)
     @customer1 = create(:customer, first_name: Faker::Name.first_name, last_name: Faker::Name.last_name)
     @customer2 = create(:customer, first_name: Faker::Name.first_name, last_name: Faker::Name.last_name)
 
-    # Associate customers with the merchant via invoices.
     create(:invoice, merchant: @merchant, customer: @customer1)
     create(:invoice, merchant: @merchant, customer: @customer2)
   end
@@ -23,7 +20,6 @@ RSpec.describe "Merchant Customers API", type: :request do
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body, symbolize_names: true)
 
-      # Verify the JSONAPI structure.
       expect(json_response).to have_key(:data)
       expect(json_response[:data]).to be_an(Array)
       json_response[:data].each do |customer|

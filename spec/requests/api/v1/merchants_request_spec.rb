@@ -1,5 +1,4 @@
 require "rails_helper"
-# to run test: bundle exec rspec spec/requests/api/v1/merchants_request_spec.rb
 
 RSpec.describe "Merchants API", type: :request do
   # Helper for parsing JSON responses.

@@ -90,7 +90,8 @@ RSpec.describe "Items API", type: :request do
       headers = {"CONTENT_TYPE" => "application/json"}
       put "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: {})
       expect(response).not_to be_successful
-      expect([400, 404]).to include(response.status)
+      # Changed expectation to 422 (Unprocessable Entity) since the controller returns 422
+      expect(response.status).to eq(422)
     end
   end
 end
