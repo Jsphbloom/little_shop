@@ -39,7 +39,39 @@ RSpec.describe "Merchants API", type: :request do
       expect(response).to have_http_status(:not_found)
 
       response_data = parsed_response
-      expect(response_data[:error]).to eq("Merchant not found")
+      expect(response_data[:message]).to eq("Couldn't find Merchant with 'id'=0")
+    end
+  end
+
+  describe "GET /api/v1/merchants/find?" do
+    it "can return a single merchant by name fragment" do
+      merchant1 = Merchant.create!(name: "Logan's Store")
+      merchant2 = Merchant.create!(name: "Alec's Store")
+      merchant3 = Merchant.create!(name: "Logan's Shop")
+      get "/api/v1/merchants/find?name=log"
+
+      expect(response).to be_successful
+      expect(response.status).to eq(200)
+
+      response_data = parsed_response
+
+      expect(response_data[:data]).to include(
+        id: merchant1.id.to_s,
+        type: "merchant"
+      )
+
+      expect(response_data[:data][:attributes]).to include(
+        name: merchant1.name
+      )
+    end
+
+    it "returns a 404 if the merchant name fragment is not found" do
+      get "/api/v1/merchants/find?name=zzz"
+
+      expect(response).to have_http_status(:not_found)
+
+      response_data = parsed_response
+      expect(response_data[:message]).to eq("Merchant not found")
     end
   end
 
