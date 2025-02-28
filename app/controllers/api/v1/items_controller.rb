@@ -1,6 +1,10 @@
 class Api::V1::ItemsController < ApplicationController
   rescue_from ActionController::ParameterMissing, with: :unprocessable_entity_response
   rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
+  rescue_from ActiveRecord::RecordNotFound do |exception|
+    render json: {error: "Item not found"}, status: :not_found
+  end
+
   def index
     item_list = Item.all
 
