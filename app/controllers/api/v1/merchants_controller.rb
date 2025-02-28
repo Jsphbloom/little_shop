@@ -8,8 +8,8 @@ class Api::V1::MerchantsController < ApplicationController
       merchant_list = Merchant.with_returned_items
     end
 
-    if params[:sort].present?
-      merchant_list = merchant_list.sort_by(params[:sort])
+    if params[:sorted] == "age"
+      merchant_list = merchant_list.sort_by_age
     end
 
     render json: MerchantSerializer.new(merchant_list)
