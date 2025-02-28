@@ -1,5 +1,4 @@
 require "rails_helper"
-#to run this test, run bundle exec rspec spec/requests/api/v1/items_request_spec.rb
 RSpec.describe "Items API", type: :request do
   before do
     Merchant.destroy_all
