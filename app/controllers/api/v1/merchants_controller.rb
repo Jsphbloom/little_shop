@@ -1,6 +1,10 @@
 class Api::V1::MerchantsController < ApplicationController
   rescue_from ActionController::ParameterMissing, with: :unprocessable_entity_response
   rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
+  rescue_from ActiveRecord::RecordNotFound do |exception|
+    render json: {error: "Merchant not found"}, status: :not_found
+  end
+
   def index
     merchant_list = Merchant.all
 
@@ -9,7 +13,11 @@ class Api::V1::MerchantsController < ApplicationController
     end
 
     if params[:sort].present?
-      merchant_list = merchant_list.sort_by(params[:sort])
+      if params[:sort] == "asc"
+        merchant_list = merchant_list.sort_by { |m| m.created_at }
+      elsif params[:sort] == "desc"
+        merchant_list = merchant_list.sort_by { |m| m.created_at }.reverse
+      end
     end
 
     render json: MerchantSerializer.new(merchant_list)
@@ -18,7 +26,6 @@ class Api::V1::MerchantsController < ApplicationController
   def show
     merchant = Merchant.find(params[:id])
     render json: MerchantSerializer.new(merchant)
-
   end
 
   def create
