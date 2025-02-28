@@ -13,4 +13,10 @@ class Merchant < ApplicationRecord
       .where(invoices: { status: "returned" })
       .distinct
   end
+
+  def self.with_item_count
+    left_joins(:items)
+    .select("merchants.id, merchants.name, COUNT(items.id) AS item_count")
+    .group("merchants.id, merchants.name")
+  end
 end

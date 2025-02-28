@@ -12,6 +12,9 @@ class Api::V1::MerchantsController < ApplicationController
       merchant_list = merchant_list.sort_by_age
     end
 
+    if params[:count].present? && params[:count] == "true"
+      merchant_list = merchant_list.with_item_count
+    end
     render json: MerchantSerializer.new(merchant_list)
   end
 
