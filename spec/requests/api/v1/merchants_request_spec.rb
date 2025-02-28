@@ -14,7 +14,7 @@ RSpec.describe "Merchants API", type: :request do
     JSON.parse(response.body, symbolize_names: true)
   end
 
-  describe "GET /api/v1/merchants" do 
+  describe "GET /api/v1/merchants" do
     it "can return a single merchant by id" do 
       merchant = create(:merchant)
 
@@ -27,7 +27,7 @@ RSpec.describe "Merchants API", type: :request do
 
       expect(response_data[:data]).to include(
         id: merchant.id.to_s,
-        type: "merchant" 
+        type: "merchant"
       )
 
       expect(response_data[:data][:attributes]).to include(
@@ -65,13 +65,9 @@ RSpec.describe "Merchants API", type: :request do
       expect(response_data[:data][:attributes]).to include(
         name: merchant1.name
       )
-
     end
-
-
-
   end
-  
+
   describe "GET /api/v1/merchant" do
     it "can return an index of merchants" do
       get "/api/v1/merchants"
