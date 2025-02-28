@@ -1,12 +1,9 @@
 require "rails_helper"
-
-# bundle exec rspec spec/requests/api/v1/items_request_spec.rb
-
+#to run this test, run `bundle exec rspec spec/requests/api/v1/items_request_spec.rb`
 RSpec.describe "Items API", type: :request do
   before do
     Merchant.destroy_all
     Item.destroy_all
-    # Converted manual static creation to dynamic FactoryBot records.
     @sMerchant1 = create(:merchant, name: Faker::Company.unique.name)
     @sMerchant2 = create(:merchant, name: Faker::Company.unique.name)
     @sMerchant3 = create(:merchant, name: Faker::Company.unique.name)
@@ -59,7 +56,7 @@ RSpec.describe "Items API", type: :request do
       expect(response).to have_http_status(:not_found)
 
       response_data = parsed_response
-      expect(response_data[:error]).to eq("Item not found")
+      expect(response_data[:error]).to eq("Item not found") #testfailed --
     end
   end
 
