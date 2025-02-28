@@ -15,7 +15,7 @@ RSpec.describe "Merchants API", type: :request do
   end
 
   describe "GET /api/v1/merchants" do
-    it "can return a single merchant by id" do 
+    it "can return a single merchant by id" do
       merchant = create(:merchant)
 
       get "/api/v1/merchants/#{merchant.id}"
@@ -41,11 +41,11 @@ RSpec.describe "Merchants API", type: :request do
       expect(response).to have_http_status(:not_found)
 
       response_data = parsed_response
-      expect(response_data[:error]).to eq("Merchant not found")
+      expect(response_data[:message]).to eq("Couldn't find Merchant with 'id'=0")
     end
   end
 
-  describe "GET /api/v1/merchants/find?" do 
+  describe "GET /api/v1/merchants/find?" do
     it "can return a single merchant by name fragment" do
       merchant1 = Merchant.create!(name: "Logan's Store")
       merchant2 = Merchant.create!(name: "Alec's Store")
@@ -59,12 +59,21 @@ RSpec.describe "Merchants API", type: :request do
 
       expect(response_data[:data]).to include(
         id: merchant1.id.to_s,
-        type: "merchant" 
+        type: "merchant"
       )
 
       expect(response_data[:data][:attributes]).to include(
         name: merchant1.name
       )
+    end
+
+    it "returns a 404 if the merchant name fragment is not found" do
+      get "/api/v1/merchants/find?name=zzz"
+
+      expect(response).to have_http_status(:not_found)
+
+      response_data = parsed_response
+      expect(response_data[:message]).to eq("Merchant not found")
     end
   end
 
@@ -72,7 +81,7 @@ RSpec.describe "Merchants API", type: :request do
     it "can return an index of merchants" do
       get "/api/v1/merchants"
       expect(response).to be_successful
-      
+
       response_data = parsed_response
       expect(response_data[:data].count).to eq(3)
       expect(response_data[:data][0][:attributes][:name]).to eq("Dummy Merchant 1")
@@ -83,7 +92,7 @@ RSpec.describe "Merchants API", type: :request do
     it "can sort merchants by oldest to newest" do
       get "/api/v1/merchants?sort=desc"
       expect(response).to be_successful
-      
+
       response_data = parsed_response
 
       expect(response_data[:data].count).to eq(3)
@@ -95,7 +104,7 @@ RSpec.describe "Merchants API", type: :request do
     it "can sort merchants by newest to oldest" do
       get "/api/v1/merchants?sort=asc"
       expect(response).to be_successful
-      
+
       response_data = parsed_response
 
       expect(response_data[:data].count).to eq(3)
