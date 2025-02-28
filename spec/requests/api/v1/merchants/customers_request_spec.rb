@@ -1,5 +1,4 @@
 require "rails_helper"
-
 RSpec.describe "Merchant Customers API", type: :request do
   before do
     Merchant.destroy_all
