@@ -48,7 +48,8 @@ class Api::V1::MerchantsController < ApplicationController
       return
     end
 
-    merchant = Merchant.where("name ILIKE ?", "%#{params[:name]}%").order(:name).first
+    merchant = find_merchant
+
     if merchant
       render json: MerchantSerializer.new(merchant)
     else
@@ -62,7 +63,8 @@ class Api::V1::MerchantsController < ApplicationController
       return
     end
 
-    merchants = Merchant.where("name ILIKE ?", "%#{params[:name]}%").order(:name)
+    merchants = find_merchants
+
     render json: MerchantSerializer.new(merchants)
   end
 
@@ -78,5 +80,13 @@ class Api::V1::MerchantsController < ApplicationController
 
   def not_found_response(e)
     render json: ErrorSerializer.format_error(e, "404"), status: :not_found
+  end
+
+  def find_merchant
+    Merchant.where("name ILIKE ?", "%#{params[:name]}%").order(:name).first
+  end
+
+  def find_merchants
+    Merchant.where("name ILIKE ?", "%#{params[:name]}%").order(:name)
   end
 end
