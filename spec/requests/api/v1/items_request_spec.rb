@@ -97,9 +97,9 @@ RSpec.describe "Items API", type: :request do
 
   describe "GET /api/v1/items/find" do
     it "can find a single item by name fragment" do
-      item = create(:item, name: "Test Item")
-      create(:item, name: "Another Item")
-      create(:item, name: "Test Product")
+      item1 = create(:item, name: "Test Item")
+      item2 = create(:item, name: "Another Item")
+      item3 = create(:item, name: "Test Product")
 
       get "/api/v1/items/find?name=test"
 
@@ -111,17 +111,108 @@ RSpec.describe "Items API", type: :request do
       expect(response_data).to have_key(:data)
       expect(response_data[:data]).to be_a(Hash)
 
+      # Ensure the first item in alphabetical order is returned
       expect(response_data[:data]).to include(
-        id: item.id.to_s,
+        id: item1.id.to_s,
         type: "item"
       )
 
       expect(response_data[:data]).to have_key(:attributes)
       expect(response_data[:data][:attributes]).to be_a(Hash)
       expect(response_data[:data][:attributes]).to include(
-        name: item.name,
-        description: item.description,
-        unit_price: item.unit_price
+        name: item1.name,
+        description: item1.description,
+        unit_price: item1.unit_price
+      )
+    end
+
+    it "can find a single item by min_price" do
+      item1 = create(:item, unit_price: 10.0)
+      item2 = create(:item, unit_price: 20.0)
+      item3 = create(:item, unit_price: 30.0)
+
+      get "/api/v1/items/find?min_price=15"
+
+      expect(response).to be_successful
+      expect(response.status).to eq(200)
+
+      response_data = parsed_response
+
+      expect(response_data).to have_key(:data)
+      expect(response_data[:data]).to be_a(Hash)
+
+      # Ensure the first item in price order is returned
+      expect(response_data[:data]).to include(
+        id: item2.id.to_s,
+        type: "item"
+      )
+
+      expect(response_data[:data]).to have_key(:attributes)
+      expect(response_data[:data][:attributes]).to be_a(Hash)
+      expect(response_data[:data][:attributes]).to include(
+        name: item2.name,
+        description: item2.description,
+        unit_price: item2.unit_price
+      )
+    end
+
+    it "can find a single item by max_price" do
+      item1 = create(:item, unit_price: 10.0)
+      item2 = create(:item, unit_price: 20.0)
+      item3 = create(:item, unit_price: 30.0)
+
+      get "/api/v1/items/find?max_price=25"
+
+      expect(response).to be_successful
+      expect(response.status).to eq(200)
+
+      response_data = parsed_response
+
+      expect(response_data).to have_key(:data)
+      expect(response_data[:data]).to be_a(Hash)
+
+      # Ensure the first item in price order is returned
+      expect(response_data[:data]).to include(
+        id: item1.id.to_s,
+        type: "item"
+      )
+
+      expect(response_data[:data]).to have_key(:attributes)
+      expect(response_data[:data][:attributes]).to be_a(Hash)
+      expect(response_data[:data][:attributes]).to include(
+        name: item1.name,
+        description: item1.description,
+        unit_price: item1.unit_price
+      )
+    end
+
+    it "can find a single item by min_price and max_price" do
+      item1 = create(:item, unit_price: 10.0)
+      item2 = create(:item, unit_price: 20.0)
+      item3 = create(:item, unit_price: 30.0)
+
+      get "/api/v1/items/find?min_price=15&max_price=25"
+
+      expect(response).to be_successful
+      expect(response.status).to eq(200)
+
+      response_data = parsed_response
+
+      expect(response_data).to have_key(:data)
+      expect(response_data[:data]).to be_a(Hash)
+
+      # Ensure the first item in price order is returned
+      expect(response_data[:data]).to include(
+        id: item2.id.to_s,
+        type: "item"
+      )
+
+      expect(response_data[:data]).to have_key(:attributes)
+      expect(response_data[:data][:attributes]).to be_a(Hash)
+      expect(response_data[:data][:attributes]).to include(
+        name: item2.name,
+        description: item2.description,
+        unit_price: item2.unit_price
       )
     end
   end

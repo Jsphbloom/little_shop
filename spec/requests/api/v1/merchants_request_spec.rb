@@ -88,9 +88,9 @@ RSpec.describe "Merchants API", type: :request do
 
   describe "GET /api/v1/merchants/find" do
     it "can find a single merchant by name fragment" do
-      merchant = create(:merchant, name: "Logan's Store")
-      create(:merchant, name: "Alec's Store")
-      create(:merchant, name: "Logan's Shop")
+      merchant1 = create(:merchant, name: "Logan's Store")
+      merchant2 = create(:merchant, name: "Alec's Store")
+      merchant3 = create(:merchant, name: "Logan's Shop")
 
       get "/api/v1/merchants/find?name=log"
 
@@ -102,15 +102,16 @@ RSpec.describe "Merchants API", type: :request do
       expect(response_data).to have_key(:data)
       expect(response_data[:data]).to be_a(Hash)
 
+      # Ensure the first merchant in alphabetical order is returned
       expect(response_data[:data]).to include(
-        id: merchant.id.to_s,
+        id: merchant3.id.to_s,
         type: "merchant"
       )
 
       expect(response_data[:data]).to have_key(:attributes)
       expect(response_data[:data][:attributes]).to be_a(Hash)
       expect(response_data[:data][:attributes]).to include(
-        name: merchant.name
+        name: merchant3.name
       )
     end
   end
@@ -151,8 +152,9 @@ RSpec.describe "Merchants API", type: :request do
         expect(attributes[:name]).to be_a(String)
       end
 
-      expect(response_merchants[0][:attributes][:name]).to eq(merchant1.name)
-      expect(response_merchants[1][:attributes][:name]).to eq(merchant3.name)
+      # Ensure the merchants are returned in alphabetical order
+      expect(response_merchants[0][:attributes][:name]).to eq(merchant3.name)
+      expect(response_merchants[1][:attributes][:name]).to eq(merchant1.name)
     end
   end
 end

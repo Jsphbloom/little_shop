@@ -48,7 +48,7 @@ class Api::V1::ItemsController < ApplicationController
     if item
       render json: ItemSerializer.new(item)
     else
-      render json: { error: "Item not found" }, status: :not_found
+      render json: {error: "Item not found"}, status: :not_found
     end
   end
 

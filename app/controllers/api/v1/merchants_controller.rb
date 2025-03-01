@@ -9,23 +9,15 @@ class Api::V1::MerchantsController < ApplicationController
       merchant_list = Merchant.with_returned_items
     end
 
-    if params[:sorted] == "age"
-      merchant_list = merchant_list.sort_by_age
+    if params[:sort].present?
+      merchant_list = merchant_list.sort_by(params[:sort])
     end
 
-    if params[:count].present? && params[:count] == "true"
-      merchant_list = merchant_list.with_item_count
-    end
     render json: MerchantSerializer.new(merchant_list)
   end
 
   def show
-    if params[:name].present?
-      merchant = Merchant.find_by_name_fragment(params[:name])
-      raise ActiveRecord::RecordNotFound.new("Merchant not found") unless merchant
-    else
-      merchant = Merchant.find(params[:id])
-    end
+    merchant = Merchant.find(params[:id])
     render json: MerchantSerializer.new(merchant)
   end
 
@@ -41,11 +33,17 @@ class Api::V1::MerchantsController < ApplicationController
   end
 
   def destroy
-    Merchant.find(params[:id]).destroy
+    merchant = Merchant.find_by(id: params[:id])
+    if merchant
+      merchant.destroy
+      head :no_content
+    else
+      head :not_found
+    end
   end
 
   def find
-    merchant = Merchant.find_by("name ILIKE ?", "%#{params[:name]}%")
+    merchant = Merchant.where("name ILIKE ?", "%#{params[:name]}%").order(:name).first
     if merchant
       render json: MerchantSerializer.new(merchant)
     else
@@ -54,7 +52,7 @@ class Api::V1::MerchantsController < ApplicationController
   end
 
   def find_all
-    merchants = Merchant.where("name ILIKE ?", "%#{params[:name]}%")
+    merchants = Merchant.where("name ILIKE ?", "%#{params[:name]}%").order(:name)
     render json: MerchantSerializer.new(merchants)
   end
 
