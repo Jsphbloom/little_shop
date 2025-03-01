@@ -39,14 +39,14 @@ RSpec.describe "Items Merchant API", type: :request do
       get "/api/v1/items/8923987297/merchant"
 
       expect(response).not_to be_successful
-      expect(response.status).to eq(400).or eq(404)
+      expect(response.status).to eq(404)
     end
 
     it "handles string item id gracefully" do
       get "/api/v1/items/string-instead-of-integer/merchant"
 
       expect(response).not_to be_successful
-      expect(response.status).to eq(400).or eq(404)
+      expect(response.status).to eq(404)
     end
   end
 end
