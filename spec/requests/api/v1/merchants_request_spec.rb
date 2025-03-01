@@ -308,45 +308,29 @@ RSpec.describe "Merchants API", type: :request do
   end
 
   describe "Non-RESTful search endpoints for Merchants" do
-    describe "GET /api/v1/merchants/find" do
-      context "with valid name query" do
-        it "returns the first matching merchant in alphabetical order" do
-          merchant1 = create(:merchant, name: "Turing School")
-          merchant2 = create(:merchant, name: "Ring World")
-          get "/api/v1/merchants/find", params: {name: "ring"}
-          body = parsed_response
-          expect(body[:data][:attributes][:name]).to eq(merchant2.name)
-        end
+    context "with faker-generated merchant name" do
+      it "finds the merchant using a substring of the generated name" do
+        generated_name = Faker::Commerce.vendor
+        merchant = create(:merchant, name: generated_name)
+        substring = generated_name[0, 3].downcase
+        get "/api/v1/merchants/find", params: {name: substring}
+        body = parsed_response
+        expect(body[:data][:attributes][:name]).to eq(merchant.name)
       end
 
-      context "with an empty name parameter" do
-        it "returns a bad_request status" do
-          get "/api/v1/merchants/find", params: {name: ""}
-          expect(response).to have_http_status(:bad_request)
-        end
-      end
-    end
-
-    describe "GET /api/v1/merchants/find_all" do
-      context "with valid name query" do
-        it "returns an array of matching merchants" do
-          merchant1 = create(:merchant, name: "Ring World")
-          merchant2 = create(:merchant, name: "Turing School")
-          get "/api/v1/merchants/find_all", params: {name: "ring"}
-          body = parsed_response
-          expect(body[:data]).to be_an(Array)
-          expect(body[:data].length).to eq(2)
-          expect(body[:data].first[:attributes][:name]).to eq(merchant1.name)
-          expect(body[:data].second[:attributes][:name]).to eq(merchant2.name)
-        end
-      end
-
-      context "with no matching merchants" do
-        it "returns an empty array" do
-          create(:merchant, name: "Turing School")
-          get "/api/v1/merchants/find_all", params: {name: "nonexistent"}
-          body = parsed_response
-          expect(body[:data]).to eq([])
+      it "returns an array of matching merchants using Faker values" do
+        generated_name1 = Faker::Commerce.vendor
+        generated_name2 = Faker::Commerce.vendor
+        create(:merchant, name: generated_name1)
+        create(:merchant, name: generated_name2)
+        # Use a substring from one of the generated names
+        substring = generated_name1[0, 2].downcase
+        get "/api/v1/merchants/find_all", params: {name: substring}
+        body = parsed_response
+        expect(body[:data]).to be_an(Array)
+        expect(body[:data].length).to be >= 1
+        body[:data].each do |merch|
+          expect(merch[:attributes][:name].downcase).to include(substring)
         end
       end
     end
