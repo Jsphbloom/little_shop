@@ -7,12 +7,12 @@ describe Merchant, type: :model do
   end
 
   describe ".find_by_name_fragment" do
-    it "finds a single merchant by a name fragment" do 
-      merchant1 = Merchant.create!(name: "Logan's Store")
-      merchant2 = Merchant.create!(name: "Alec's Store")
-      merchant3 = Merchant.create!(name: "Logan's Shop")
-      merchant4 = Merchant.create!(name: "Alec's Shop")
-      merchant5 = Merchant.create!(name: "Dummy Merchant 1")
+    it "finds a single merchant by a name fragment" do
+      merchant1 = create(:merchant, name: "Logan's Store")
+      merchant2 = create(:merchant, name: "Alec's Store")
+      create(:merchant, name: "Logan's Shop")
+      create(:merchant, name: "Alec's Shop")
+      create(:merchant, name: "Dummy Merchant 1")
 
       expect(Merchant.find_by_name_fragment("Logan")).to eq(merchant1)
       expect(Merchant.find_by_name_fragment("Alec")).to eq(merchant2)
@@ -40,7 +40,6 @@ describe Merchant, type: :model do
       expect(Merchant.with_item_count[0].item_count).to eq(1)
       expect(Merchant.with_item_count[1].item_count).to eq(0)
       expect(Merchant.with_item_count[2].item_count).to eq(2)
-
     end
   end
 end
