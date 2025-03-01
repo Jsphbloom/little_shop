@@ -13,9 +13,9 @@ describe Item, type: :model do
       create(:item, unit_price: 7)
       create(:item, unit_price: 4)
       create(:item, unit_price: 100)
-      
+
       sorted_prices = Item.sort_by_price.pluck(:unit_price)
-      
+
       expect(sorted_prices).to eq([2, 4, 7, 10, 100])
     end
   end
