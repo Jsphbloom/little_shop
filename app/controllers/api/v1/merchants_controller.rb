@@ -41,13 +41,7 @@ class Api::V1::MerchantsController < ApplicationController
   end
 
   def destroy
-    merchant = Merchant.find_by(id: params[:id])
-    if merchant
-      merchant.destroy
-      head :no_content
-    else
-      head :not_found
-    end
+    Merchant.find(params[:id]).destroy
   end
 
   private

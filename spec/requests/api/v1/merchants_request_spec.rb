@@ -1,12 +1,9 @@
 require "rails_helper"
 
 RSpec.describe "Merchants API", type: :request do
-  before do
-    Merchant.destroy_all
-    @sMerchant3 = create(:merchant, name: "Merchant 3", created_at: 3.days.ago)
-    @sMerchant2 = create(:merchant, name: "Merchant 2", created_at: 2.days.ago)
-    @sMerchant1 = create(:merchant, name: "Merchant 1", created_at: 1.day.ago)
-  end
+  let(:merchant1) { create(:merchant) }
+  let(:merchant2) { create(:merchant) }
+  let(:merchant3) { create(:merchant) }
 
   def parsed_response
     JSON.parse(response.body, symbolize_names: true)
@@ -82,9 +79,9 @@ RSpec.describe "Merchants API", type: :request do
 
       response_data = parsed_response
       expect(response_data[:data].count).to eq(3)
-      expect(response_data[:data][0][:attributes][:name]).to eq(@sMerchant3.name)
-      expect(response_data[:data][1][:attributes][:name]).to eq(@sMerchant2.name)
-      expect(response_data[:data][2][:attributes][:name]).to eq(@sMerchant1.name)
+      expect(response_data[:data][0][:attributes][:name]).to eq(merchant3.name)
+      expect(response_data[:data][1][:attributes][:name]).to eq(merchant2.name)
+      expect(response_data[:data][2][:attributes][:name]).to eq(merchant1.name)
     end
 
     it "can sort merchants by newest to oldest" do
@@ -94,9 +91,9 @@ RSpec.describe "Merchants API", type: :request do
       response_data = parsed_response
 
       expect(response_data[:data].count).to eq(3)
-      expect(response_data[:data][0][:attributes][:name]).to eq(@sMerchant1.name)
-      expect(response_data[:data][1][:attributes][:name]).to eq(@sMerchant2.name)
-      expect(response_data[:data][2][:attributes][:name]).to eq(@sMerchant3.name)
+      expect(response_data[:data][0][:attributes][:name]).to eq(merchant1.name)
+      expect(response_data[:data][1][:attributes][:name]).to eq(merchant2.name)
+      expect(response_data[:data][2][:attributes][:name]).to eq(merchant3.name)
     end
 
     it "successfully get merchants with invoice status of returned" do
@@ -161,9 +158,9 @@ RSpec.describe "Merchants API", type: :request do
   describe "DELETE /api/v1/merchants/:id" do
     it "deletes an existing merchant created in the before block" do
       # Use sMerchant1 created in before block
-      delete "/api/v1/merchants/#{@sMerchant1.id}"
+      delete "/api/v1/merchants/#{merchant1.id}"
       expect(response).to have_http_status(:no_content)
-      expect(Merchant.find_by(id: @sMerchant1.id)).to be_nil
+      expect(Merchant.find_by(id: merchant1.id)).to be_nil
     end
 
     it "returns not found when deleting a non-existent merchant" do
