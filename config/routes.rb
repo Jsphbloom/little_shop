@@ -8,11 +8,11 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "posts#index"
 
-  # Custom routes for search functionality
-  get "/api/v1/items/find", to: "api/v1/items#find" # find a single item which matches a search term
-  get "/api/v1/items/find_all", to: "api/v1/items#find_all" # find all items which match a search term
-  get "/api/v1/merchants/find", to: "api/v1/merchants#find" # find a single merchant which matches a search term
-  get "/api/v1/merchants/find_all", to: "api/v1/merchants#find_all" # find all merchants which match a search term
+
+  get "/api/v1/items/find", to: "api/v1/items#find" 
+  get "/api/v1/items/find_all", to: "api/v1/items#find_all" 
+  get "/api/v1/merchants/find", to: "api/v1/merchants#find" 
+  get "/api/v1/merchants/find_all", to: "api/v1/merchants#find_all" 
 
   get "/api/v1/items", to: "api/v1/items#index"
   get "/api/v1/merchants", to: "api/v1/merchants#index"
