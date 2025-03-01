@@ -36,8 +36,6 @@ class Api::V1::ItemsController < ApplicationController
     head :no_content
   end
 
-  # --- Non-RESTful endpoints ---
-
   def find
     if invalid_find_params?
       render json: {error: "Cannot send both name and price parameters"}, status: :bad_request and return

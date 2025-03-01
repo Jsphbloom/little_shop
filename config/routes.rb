@@ -8,7 +8,6 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "posts#index"
   
-  ## Non-RESTful find endpoints (placed at the top to avoid any conflict with dynamic segments)
   
   get "/api/v1/items/find", to: "api/v1/items#find"
   get "/api/v1/items/find_all", to: "api/v1/items#find_all"
