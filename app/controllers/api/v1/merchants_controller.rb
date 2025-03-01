@@ -44,6 +44,29 @@ class Api::V1::MerchantsController < ApplicationController
     Merchant.find(params[:id]).destroy
   end
 
+  # --- Non-RESTful search endpoints added to support search by name ---
+  def find
+    # Added to find a single merchant based on a case-insensitive search by the name parameter.
+    if params[:name].blank?
+      render json: {error: "Parameter cannot be missing or empty"}, status: :bad_request and return
+    end
+    merchant = Merchant.where("name ILIKE ?", "%#{params[:name]}%").order(:name).first
+    if merchant
+      render json: MerchantSerializer.new(merchant)
+    else
+      render json: {error: "Merchant not found"}, status: :not_found
+    end
+  end
+
+  def find_all
+    # Added to return all merchants matching a case-insensitive search by the name parameter.
+    if params[:name].blank?
+      render json: {error: "Parameter cannot be missing or empty"}, status: :bad_request and return
+    end
+    merchants = Merchant.where("name ILIKE ?", "%#{params[:name]}%").order(:name)
+    render json: MerchantSerializer.new(merchants)
+  end
+
   private
 
   def merchant_params
