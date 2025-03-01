@@ -84,6 +84,11 @@ RSpec.describe "Merchants API", type: :request do
         get "/api/v1/merchants?status=returned"
         expect(response).to be_successful
       end
+
+      it "successfully returns merchant list with item count" do
+        get "/api/v1/merchants?count=true"
+        expect(response).to be_successful
+      end
     end
 
     describe "GET /api/v1/merchants" do
