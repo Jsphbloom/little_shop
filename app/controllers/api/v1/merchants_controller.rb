@@ -1,9 +1,6 @@
 class Api::V1::MerchantsController < ApplicationController
   rescue_from ActionController::ParameterMissing, with: :unprocessable_entity_response
   rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
-  rescue_from ActiveRecord::RecordNotFound do |exception|
-    render json: {error: "Merchant not found"}, status: :not_found
-  end
 
   def index
     merchant_list = Merchant.all
@@ -25,7 +22,7 @@ class Api::V1::MerchantsController < ApplicationController
   def show
     if params[:name].present?
       merchant = Merchant.find_by_name_fragment(params[:name])
-      raise ActiveRecord::RecordNotFound unless merchant
+      raise ActiveRecord::RecordNotFound.new("Merchant not found") unless merchant
     else
       merchant = Merchant.find(params[:id])
     end
@@ -44,13 +41,7 @@ class Api::V1::MerchantsController < ApplicationController
   end
 
   def destroy
-    merchant = Merchant.find_by(id: params[:id])
-    if merchant
-      merchant.destroy
-      head :no_content
-    else
-      head :not_found
-    end
+    Merchant.find(params[:id]).destroy
   end
 
   private

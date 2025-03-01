@@ -10,44 +10,47 @@ RSpec.describe "Merchant Items API", type: :request do
   def parsed_response
     JSON.parse(response.body, symbolize_names: true)
   end
-  describe "GET /api/v1/merchants/:id/items" do
-    it "returns all items belonging to merchant" do
-      get "/api/v1/merchants/#{merchant.id}/items"
 
-      expect(response).to be_successful
+  describe "endpoints" do
+    describe "GET /api/v1/merchants/:id/items" do
+      it "returns all items belonging to merchant" do
+        get "/api/v1/merchants/#{merchant.id}/items"
 
-      response_data = parsed_response
+        expect(response).to be_successful
 
-      expect(response_data).to have_key(:data)
-      expect(response_data[:data]).to be_an(Array)
+        response_data = parsed_response
 
-      response_items = response_data[:data]
+        expect(response_data).to have_key(:data)
+        expect(response_data[:data]).to be_an(Array)
 
-      expect(response_items.length).to eq(25)
+        response_items = response_data[:data]
 
-      response_items.each do |item|
-        expect(item).to have_key(:id)
-        expect(item[:id]).to be_a(String)
+        expect(response_items.length).to eq(25)
 
-        expect(item).to have_key(:type)
-        expect(item[:type]).to eq("item")
+        response_items.each do |item|
+          expect(item).to have_key(:id)
+          expect(item[:id]).to be_a(String)
 
-        expect(item).to have_key(:attributes)
-        expect(item[:attributes]).to be_a(Hash)
+          expect(item).to have_key(:type)
+          expect(item[:type]).to eq("item")
 
-        attributes = item[:attributes]
+          expect(item).to have_key(:attributes)
+          expect(item[:attributes]).to be_a(Hash)
 
-        expect(attributes).to have_key(:name)
-        expect(attributes[:name]).to be_a(String)
+          attributes = item[:attributes]
 
-        expect(attributes).to have_key(:description)
-        expect(attributes[:description]).to be_a(String)
+          expect(attributes).to have_key(:name)
+          expect(attributes[:name]).to be_a(String)
 
-        expect(attributes).to have_key(:unit_price)
-        expect(attributes[:unit_price]).to be_a(Float)
+          expect(attributes).to have_key(:description)
+          expect(attributes[:description]).to be_a(String)
 
-        expect(attributes).to have_key(:merchant_id)
-        expect(attributes[:merchant_id]).to eq(merchant.id)
+          expect(attributes).to have_key(:unit_price)
+          expect(attributes[:unit_price]).to be_a(Float)
+
+          expect(attributes).to have_key(:merchant_id)
+          expect(attributes[:merchant_id]).to eq(merchant.id)
+        end
       end
     end
   end
@@ -57,7 +60,12 @@ RSpec.describe "Merchant Items API", type: :request do
       get "/api/v1/merchants/8923987297/items"
 
       expect(response).not_to be_successful
-      expect(response.status).to eq(400).or eq(404)
+      expect(response.status).to eq(404)
+
+      response_data = parsed_response
+
+      expect(response_data[:errors]).to eq(["404"])
+      expect(response_data[:message]).to eq("Couldn't find Merchant with 'id'=8923987297")
     end
   end
 end

@@ -8,5 +8,4 @@ class Item < ApplicationRecord
   def self.sort_by_price
     Item.order(unit_price: :asc)
   end
-
 end
