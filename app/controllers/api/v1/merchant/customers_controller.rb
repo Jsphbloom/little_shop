@@ -1,4 +1,4 @@
-class Api::V1::Merchants::CustomersController < ApplicationController
+class Api::V1::Merchant::CustomersController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
   def index
     merchant = Merchant.find(params[:merchant_id])
