@@ -57,7 +57,12 @@ RSpec.describe "Merchant Items API", type: :request do
       get "/api/v1/merchants/8923987297/items"
 
       expect(response).not_to be_successful
-      expect(response.status).to eq(400).or eq(404)
+      expect(response.status).to eq(404)
+
+      response_data = parsed_response
+
+      expect(response_data[:errors]).to eq(["404"])
+      expect(response_data[:message]).to eq("Couldn't find Merchant with 'id'=8923987297")
     end
   end
 end
