@@ -22,7 +22,7 @@ class Api::V1::MerchantsController < ApplicationController
   def show
     if params[:name].present?
       merchant = Merchant.find_by_name_fragment(params[:name])
-      raise ActiveRecord::RecordNotFound unless merchant
+      raise ActiveRecord::RecordNotFound.new("Merchant not found") unless merchant
     else
       merchant = Merchant.find(params[:id])
     end
