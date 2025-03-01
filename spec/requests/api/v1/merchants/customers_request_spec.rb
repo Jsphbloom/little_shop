@@ -1,33 +1,47 @@
 require "rails_helper"
 RSpec.describe "Merchant Customers API", type: :request do
+  let(:merchant) { create(:merchant) }
+
   before do
-    Merchant.destroy_all
-    Customer.destroy_all
-    Invoice.destroy_all
+    create_list(:invoice, 50, merchant: merchant)
+  end
 
-    @merchant = create(:merchant, name: Faker::Company.name)
-    @customer1 = create(:customer, first_name: Faker::Name.first_name, last_name: Faker::Name.last_name)
-    @customer2 = create(:customer, first_name: Faker::Name.first_name, last_name: Faker::Name.last_name)
-
-    create(:invoice, merchant: @merchant, customer: @customer1)
-    create(:invoice, merchant: @merchant, customer: @customer2)
+  def parsed_response
+    JSON.parse(response.body, symbolize_names: true)
   end
 
   describe "GET /api/v1/merchants/:merchant_id/customers" do
     it "returns a list of customers for the merchant in JSONAPI format" do
-      get "/api/v1/merchants/#{@merchant.id}/customers"
-      expect(response).to have_http_status(:ok)
-      json_response = JSON.parse(response.body, symbolize_names: true)
+      get "/api/v1/merchants/#{merchant.id}/customers"
 
-      expect(json_response).to have_key(:data)
-      expect(json_response[:data]).to be_an(Array)
-      json_response[:data].each do |customer|
+      expect(response).to be_successful
+
+      response_data = parsed_response
+
+      expect(response_data).to have_key(:data)
+      expect(response_data[:data]).to be_an(Array)
+
+      response_customers = response_data[:data]
+
+      expect(response_customers.length).to eq(50)
+
+      response_data[:data].each do |customer|
         expect(customer).to have_key(:id)
+        expect(customer[:id]).to be_a(String)
+
         expect(customer).to have_key(:type)
         expect(customer[:type]).to eq("customer")
+
         expect(customer).to have_key(:attributes)
-        expect(customer[:attributes]).to have_key(:first_name)
-        expect(customer[:attributes]).to have_key(:last_name)
+        expect(customer[:attributes]).to be_a(Hash)
+
+        attributes = customer[:attributes]
+
+        expect(attributes).to have_key(:first_name)
+        expect(attributes[:first_name]).to be_a(String)
+
+        expect(attributes).to have_key(:last_name)
+        expect(attributes[:last_name]).to be_a(String)
       end
     end
   end
