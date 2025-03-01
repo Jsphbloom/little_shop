@@ -4,11 +4,6 @@ class Api::V1::ItemsController < ApplicationController
 
   def index
     item_list = Item.all
-
-    if params[:sorted] == "price"
-      item_list = Item.sort_by_price
-    end
-
     render json: ItemSerializer.new(item_list)
   end
 
@@ -23,16 +18,34 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def update
-    if params[:item].present? && params[:item][:merchant_id]
-      Merchant.find(params[:item][:merchant_id])
-    end
+    raise ActiveRecord::RecordNotFound if params[:merchant_id].present? && !Merchant.find(params[:merchant_id])
     item = Item.find(params[:id])
     item.update(item_params)
     render json: ItemSerializer.new(item)
   end
 
   def destroy
-    Item.find(params[:id]).destroy
+    item = Item.find_by(id: params[:id])
+    if item
+      item.destroy
+      head :no_content
+    else
+      head :not_found
+    end
+  end
+
+  def find
+    item = Item.find_by("name ILIKE ?", "%#{params[:name]}%")
+    if item
+      render json: ItemSerializer.new(item)
+    else
+      render json: {error: "Item not found"}, status: :not_found
+    end
+  end
+
+  def find_all
+    items = Item.where("name ILIKE ?", "%#{params[:name]}%")
+    render json: ItemSerializer.new(items)
   end
 
   private
