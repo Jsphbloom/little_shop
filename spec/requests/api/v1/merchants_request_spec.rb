@@ -1,5 +1,5 @@
 require "rails_helper"
-# to run this test, run `bundle exec rspec spec/requests/api/v1/merchants_request_spec.rb`
+
 RSpec.describe "Merchants API", type: :request do
   def parsed_response
     JSON.parse(response.body, symbolize_names: true)
