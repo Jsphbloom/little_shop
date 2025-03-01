@@ -55,7 +55,7 @@ RSpec.describe "Items API", type: :request do
       expect(response).to have_http_status(:not_found)
 
       response_data = parsed_response
-      expect(response_data[:error]).to eq("Item not found")
+      expect(response_data[:message]).to eq("Couldn't find Item with 'id'=0")
     end
   end
 
@@ -78,14 +78,14 @@ RSpec.describe "Items API", type: :request do
 
     it "can sort items by price" do
       @sItem4 = Item.create!(
-      name: "Dummy Item 4",
-      description: "Dummy description 4",
-      unit_price: 1.0,
-      merchant: @sMerchant1
-    )
+        name: "Dummy Item 4",
+        description: "Dummy description 4",
+        unit_price: 1.0,
+        merchant: @sMerchant1
+      )
       get "/api/v1/items?sorted=price"
       expect(response).to be_successful
-      
+
       response_data = parsed_response
 
       expect(response_data[:data].count).to eq(4)

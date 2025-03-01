@@ -94,9 +94,9 @@ RSpec.describe "Merchants API", type: :request do
       response_data = parsed_response
 
       expect(response_data[:data].count).to eq(3)
-      expect(response_data[:data][0][:attributes][:name]).to eq(@sMerchant3.name)
+      expect(response_data[:data][0][:attributes][:name]).to eq(@sMerchant1.name)
       expect(response_data[:data][1][:attributes][:name]).to eq(@sMerchant2.name)
-      expect(response_data[:data][2][:attributes][:name]).to eq(@sMerchant1.name)
+      expect(response_data[:data][2][:attributes][:name]).to eq(@sMerchant3.name)
     end
 
     it "successfully get merchants with invoice status of returned" do
