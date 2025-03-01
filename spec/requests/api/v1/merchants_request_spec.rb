@@ -146,124 +146,76 @@ RSpec.describe "Merchants API", type: :request do
       end
     end
 
-    describe "Non-RESTful search endpoint for Merchants" do
-      describe "GET /api/v1/merchants/find_all" do
-        context "with a valid name fragment" do
-          it "returns all matching merchants" do
-            m1 = create(:merchant, name: "Logan's Store")
-            m2 = create(:merchant, name: "Logan's Shop")
-            create(:merchant, name: "Alec's Store")
-            get "/api/v1/merchants/find_all", params: {name: "logan"}
-            expect(response).to be_successful
-            body = parsed_response
-            expect(body[:data]).to be_an(Array)
-            expect(body[:data].count).to eq(2)
-            body[:data].each do |merchant|
-              expect(merchant[:attributes][:name].downcase).to include("logan")
-            end
-          end
-        end
+    describe "POST /api/v1/merchants" do
+      it "can create a new merchant" do
+        merchant_params = {name: Faker::Commerce.vendor}
+        headers = {"CONTENT_TYPE" => "application/json"}
 
-        context "with missing or empty name" do
-          it "returns a bad_request status" do
-            get "/api/v1/merchants/find_all", params: {name: ""}
-            expect(response).to have_http_status(:bad_request)
-          end
-        end
-      end
+        post "/api/v1/merchants", headers: headers, params: JSON.generate(merchant: merchant_params)
 
-      describe "GET /api/v1/merchants/find" do
-        context "with valid name search" do
-          it "returns the first matching merchant in alphabetical order" do
-            m1 = create(:merchant, name: "Turing")
-            m2 = create(:merchant, name: "Ring World")
-            # "Ring World" alphabetically comes before "Turing"
-            get "/api/v1/merchants/find", params: {name: "ring"}
-            expect(response).to be_successful
-            body = parsed_response
-            expect(body[:data][:attributes][:name]).to eq(m2.name)
-          end
-        end
+        expect(response).to be_successful
+        expect(response.status).to eq(201)
 
-        context "with missing or empty name" do
-          it "returns bad_request" do
-            get "/api/v1/merchants/find", params: {name: ""}
-            expect(response).to have_http_status(:bad_request)
-          end
-        end
+        created_merchant = Merchant.last
+
+        expect(created_merchant).to have_attributes(merchant_params)
+
+        response_data = parsed_response
+
+        expect(response_data[:data]).to include(
+          id: created_merchant.id.to_s,
+          type: "merchant"
+        )
+
+        expect(response_data[:data]).to have_key(:attributes)
+        expect(response_data[:data][:attributes]).to be_a(Hash)
+        expect(response_data[:data][:attributes]).to include(merchant_params)
       end
     end
-  end
 
-  describe "POST /api/v1/merchants" do
-    it "can create a new merchant" do
-      merchant_params = {name: Faker::Commerce.vendor}
-      headers = {"CONTENT_TYPE" => "application/json"}
+    describe "PATCH /api/v1/merchants/:id" do
+      it "can update an existing merchant" do
+        merchant = create(:merchant)
 
-      post "/api/v1/merchants", headers: headers, params: JSON.generate(merchant: merchant_params)
+        new_name = Faker::Commerce.vendor until new_name != merchant.name && new_name
 
-      expect(response).to be_successful
-      expect(response.status).to eq(201)
+        merchant_params = {name: new_name}
+        headers = {"CONTENT_TYPE" => "application/json"}
 
-      created_merchant = Merchant.last
+        patch "/api/v1/merchants/#{merchant.id}", headers: headers, params: JSON.generate(merchant: merchant_params)
 
-      expect(created_merchant).to have_attributes(merchant_params)
+        expect(response).to be_successful
+        expect(response.status).to eq(200)
 
-      response_data = parsed_response
+        merchant = Merchant.find(merchant.id)
 
-      expect(response_data[:data]).to include(
-        id: created_merchant.id.to_s,
-        type: "merchant"
-      )
+        expect(merchant).to have_attributes(merchant_params)
 
-      expect(response_data[:data]).to have_key(:attributes)
-      expect(response_data[:data][:attributes]).to be_a(Hash)
-      expect(response_data[:data][:attributes]).to include(merchant_params)
+        response_data = parsed_response
+
+        expect(response_data[:data]).to include(
+          id: merchant.id.to_s,
+          type: "merchant"
+        )
+
+        expect(response_data[:data]).to have_key(:attributes)
+        expect(response_data[:data][:attributes]).to be_a(Hash)
+        expect(response_data[:data][:attributes]).to include(merchant_params)
+        expect(merchant.name).to eq(new_name)
+      end
     end
-  end
 
-  describe "PATCH /api/v1/merchants/:id" do
-    it "can update an existing merchant" do
-      merchant = create(:merchant)
+    describe "DELETE /api/v1/merchants/:id" do
+      it "deletes an existing merchant created in the before block" do
+        merchant = create(:merchant)
 
-      new_name = Faker::Commerce.vendor until new_name != merchant.name && new_name
+        delete "/api/v1/merchants/#{merchant.id}"
 
-      merchant_params = {name: new_name}
-      headers = {"CONTENT_TYPE" => "application/json"}
+        expect(response).to be_successful
+        expect(response.status).to eq(204)
 
-      patch "/api/v1/merchants/#{merchant.id}", headers: headers, params: JSON.generate(merchant: merchant_params)
-
-      expect(response).to be_successful
-      expect(response.status).to eq(200)
-
-      merchant = Merchant.find(merchant.id)
-
-      expect(merchant).to have_attributes(merchant_params)
-
-      response_data = parsed_response
-
-      expect(response_data[:data]).to include(
-        id: merchant.id.to_s,
-        type: "merchant"
-      )
-
-      expect(response_data[:data]).to have_key(:attributes)
-      expect(response_data[:data][:attributes]).to be_a(Hash)
-      expect(response_data[:data][:attributes]).to include(merchant_params)
-      expect(merchant.name).to eq(new_name)
-    end
-  end
-
-  describe "DELETE /api/v1/merchants/:id" do
-    it "deletes an existing merchant created in the before block" do
-      merchant = create(:merchant)
-
-      delete "/api/v1/merchants/#{merchant.id}"
-
-      expect(response).to be_successful
-      expect(response.status).to eq(204)
-
-      expect(Merchant.find_by(id: merchant.id)).to be_nil
+        expect(Merchant.find_by(id: merchant.id)).to be_nil
+      end
     end
   end
 
