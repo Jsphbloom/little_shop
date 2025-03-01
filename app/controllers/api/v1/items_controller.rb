@@ -23,20 +23,16 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def update
-    raise ActiveRecord::RecordNotFound if params[:merchant_id].present? && !Merchant.find(params[:merchant_id])
+    if params[:item].present? && params[:item][:merchant_id]
+      Merchant.find(params[:item][:merchant_id])
+    end
     item = Item.find(params[:id])
     item.update(item_params)
     render json: ItemSerializer.new(item)
   end
 
   def destroy
-    item = Item.find_by(id: params[:id])
-    if item
-      item.destroy
-      head :no_content
-    else
-      head :not_found
-    end
+    Item.find(params[:id]).destroy
   end
 
   private
