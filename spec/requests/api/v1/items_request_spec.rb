@@ -141,7 +141,7 @@ RSpec.describe "Items API", type: :request do
       expect(response_data).to have_key(:data)
       expect(response_data[:data]).to be_a(Hash)
 
-      # Ensure the first item in price order is returned
+      
       expect(response_data[:data]).to include(
         id: item2.id.to_s,
         type: "item"
@@ -171,7 +171,7 @@ RSpec.describe "Items API", type: :request do
       expect(response_data).to have_key(:data)
       expect(response_data[:data]).to be_a(Hash)
 
-      # Ensure the first item in price order is returned
+     
       expect(response_data[:data]).to include(
         id: item1.id.to_s,
         type: "item"
@@ -201,7 +201,6 @@ RSpec.describe "Items API", type: :request do
       expect(response_data).to have_key(:data)
       expect(response_data[:data]).to be_a(Hash)
 
-      # Ensure the first item in price order is returned
       expect(response_data[:data]).to include(
         id: item2.id.to_s,
         type: "item"
