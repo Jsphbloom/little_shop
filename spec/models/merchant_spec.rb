@@ -7,6 +7,18 @@ describe Merchant, type: :model do
   end
 
   describe "class methods" do
+    describe ".sort_by_age" do
+      it "can return a list of merchants sorted by creation time" do
+        first = create(:merchant)
+        second = create(:merchant)
+        third = create(:merchant)
+        fourth = create(:merchant)
+        fifth = create(:merchant)
+
+        expect(Merchant.sort_by_age).to eq([fifth, fourth, third, second, first])
+      end
+    end
+
     describe ".with_returned_items" do
       it "can return a list of merchants with returned items" do
         create_list(:merchant, 5)
