@@ -35,11 +35,20 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def find
-    item = Item.find_by("name ILIKE ?", "%#{params[:name]}%")
+    if params[:name]
+      item = Item.where("name ILIKE ?", "%#{params[:name]}%").order(:name).first
+    elsif params[:min_price] && params[:max_price]
+      item = Item.where("unit_price >= ? AND unit_price <= ?", params[:min_price], params[:max_price]).order(:unit_price).first
+    elsif params[:min_price]
+      item = Item.where("unit_price >= ?", params[:min_price]).order(:unit_price).first
+    elsif params[:max_price]
+      item = Item.where("unit_price <= ?", params[:max_price]).order(:unit_price).first
+    end
+
     if item
       render json: ItemSerializer.new(item)
     else
-      render json: {error: "Item not found"}, status: :not_found
+      render json: { error: "Item not found" }, status: :not_found
     end
   end
 
