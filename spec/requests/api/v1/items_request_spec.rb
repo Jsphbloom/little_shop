@@ -1,4 +1,5 @@
 require "rails_helper"
+
 RSpec.describe "Items API", type: :request do
   def parsed_response
     JSON.parse(response.body, symbolize_names: true)
@@ -280,6 +281,70 @@ RSpec.describe "Items API", type: :request do
         expect(response.status).to eq(204)
 
         expect(Item.find_by(id: item.id)).to be_nil
+      end
+    end
+  end
+
+  describe "Non-RESTful search endpoints for Items" do
+    describe "GET /api/v1/items/find" do
+      context "with valid name query" do
+        it "returns the first matching item in alphabetical order" do
+          item1 = create(:item, name: "Turing Machine")
+          item2 = create(:item, name: "Ring Device")
+          get "/api/v1/items/find", params: {name: "ring"}
+          body = parsed_response
+          expect(body[:data][:attributes][:name]).to eq(item2.name)
+        end
+      end
+
+      context "with valid price query" do
+        it "returns the lowest-priced item within the range" do
+          item1 = create(:item, name: "Gadget A", unit_price: 100.0)
+          item2 = create(:item, name: "Gadget B", unit_price: 50.0)
+          get "/api/v1/items/find", params: {min_price: 40, max_price: 150}
+          body = parsed_response
+          expect(body[:data][:attributes][:name]).to eq(item2.name)
+        end
+      end
+
+      context "when both name and price parameters are sent" do
+        it "returns a bad_request status" do
+          get "/api/v1/items/find", params: {name: "ring", min_price: 50}
+          expect(response).to have_http_status(:bad_request)
+        end
+      end
+
+      context "with missing search parameters" do
+        it "returns a bad_request status" do
+          get "/api/v1/items/find", params: {}
+          expect(response).to have_http_status(:bad_request)
+        end
+      end
+    end
+
+    describe "GET /api/v1/items/find_all" do
+      context "with valid name query" do
+        it "returns an array of matching items" do
+          item1 = create(:item, name: "Ring Device")
+          item2 = create(:item, name: "Ring Gadget")
+          create(:item, name: "Other Device")
+          get "/api/v1/items/find_all", params: {name: "ring"}
+          body = parsed_response
+          expect(body[:data]).to be_an(Array)
+          expect(body[:data].length).to eq(2)
+          body[:data].each do |item|
+            expect(item[:attributes][:name].downcase).to include("ring")
+          end
+        end
+      end
+
+      context "with no matching items" do
+        it "returns an empty array" do
+          create(:item, name: "Gadget Device")
+          get "/api/v1/items/find_all", params: {name: "nonexistent"}
+          body = parsed_response
+          expect(body[:data]).to eq([])
+        end
       end
     end
   end

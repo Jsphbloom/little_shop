@@ -1,5 +1,5 @@
 require "rails_helper"
-
+# to run this test, run `bundle exec rspec spec/requests/api/v1/merchants_request_spec.rb`
 RSpec.describe "Merchants API", type: :request do
   def parsed_response
     JSON.parse(response.body, symbolize_names: true)
@@ -304,6 +304,51 @@ RSpec.describe "Merchants API", type: :request do
 
       expect(response_data[:errors].first).to eq("404")
       expect(response_data[:message]).to eq("Couldn't find Merchant with 'id'=0")
+    end
+  end
+
+  describe "Non-RESTful search endpoints for Merchants" do
+    describe "GET /api/v1/merchants/find" do
+      context "with valid name query" do
+        it "returns the first matching merchant in alphabetical order" do
+          merchant1 = create(:merchant, name: "Turing School")
+          merchant2 = create(:merchant, name: "Ring World")
+          get "/api/v1/merchants/find", params: {name: "ring"}
+          body = parsed_response
+          expect(body[:data][:attributes][:name]).to eq(merchant2.name)
+        end
+      end
+
+      context "with an empty name parameter" do
+        it "returns a bad_request status" do
+          get "/api/v1/merchants/find", params: {name: ""}
+          expect(response).to have_http_status(:bad_request)
+        end
+      end
+    end
+
+    describe "GET /api/v1/merchants/find_all" do
+      context "with valid name query" do
+        it "returns an array of matching merchants" do
+          merchant1 = create(:merchant, name: "Ring World")
+          merchant2 = create(:merchant, name: "Turing School")
+          get "/api/v1/merchants/find_all", params: {name: "ring"}
+          body = parsed_response
+          expect(body[:data]).to be_an(Array)
+          expect(body[:data].length).to eq(2)
+          expect(body[:data].first[:attributes][:name]).to eq(merchant1.name)
+          expect(body[:data].second[:attributes][:name]).to eq(merchant2.name)
+        end
+      end
+
+      context "with no matching merchants" do
+        it "returns an empty array" do
+          create(:merchant, name: "Turing School")
+          get "/api/v1/merchants/find_all", params: {name: "nonexistent"}
+          body = parsed_response
+          expect(body[:data]).to eq([])
+        end
+      end
     end
   end
 end
