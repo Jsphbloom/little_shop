@@ -40,6 +40,11 @@ RSpec.describe "Items Merchant API", type: :request do
 
       expect(response).not_to be_successful
       expect(response.status).to eq(404)
+
+      response_data = parsed_response
+
+      expect(response_data[:errors]).to eq(["404"])
+      expect(response_data[:message]).to eq("Couldn't find Item with 'id'=8923987297")
     end
 
     it "handles string item id gracefully" do
@@ -47,6 +52,11 @@ RSpec.describe "Items Merchant API", type: :request do
 
       expect(response).not_to be_successful
       expect(response.status).to eq(404)
+
+      response_data = parsed_response
+
+      expect(response_data[:errors]).to eq(["404"])
+      expect(response_data[:message]).to eq("Couldn't find Item with 'id'=string-instead-of-integer")
     end
   end
 end
