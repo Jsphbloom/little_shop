@@ -215,6 +215,42 @@ RSpec.describe "Items API", type: :request do
         unit_price: item2.unit_price
       )
     end
+
+    it "returns an error when both name and price parameters are sent" do
+      get "/api/v1/items/find?name=ring&min_price=50"
+
+      expect(response).not_to be_successful
+      expect(response.status).to eq(400)
+
+      response_data = parsed_response
+
+      expect(response_data).to have_key(:error)
+      expect(response_data[:error]).to eq("Cannot send both name and price parameters")
+    end
+
+    it "returns an error when no parameters are sent" do
+      get "/api/v1/items/find"
+
+      expect(response).not_to be_successful
+      expect(response.status).to eq(400)
+
+      response_data = parsed_response
+
+      expect(response_data).to have_key(:error)
+      expect(response_data[:error]).to eq("Parameter cannot be missing or empty")
+    end
+
+    it "returns an error when name parameter is empty" do
+      get "/api/v1/items/find?name="
+
+      expect(response).not_to be_successful
+      expect(response.status).to eq(400)
+
+      response_data = parsed_response
+
+      expect(response_data).to have_key(:error)
+      expect(response_data[:error]).to eq("Parameter cannot be missing or empty")
+    end
   end
 
   describe "GET /api/v1/items/find_all" do
@@ -264,6 +300,42 @@ RSpec.describe "Items API", type: :request do
 
       expect(response_items[0][:attributes][:name]).to eq(item1.name)
       expect(response_items[1][:attributes][:name]).to eq(item3.name)
+    end
+
+    it "returns an error when both name and price parameters are sent" do
+      get "/api/v1/items/find_all?name=ring&min_price=50"
+
+      expect(response).not_to be_successful
+      expect(response.status).to eq(400)
+
+      response_data = parsed_response
+
+      expect(response_data).to have_key(:error)
+      expect(response_data[:error]).to eq("Cannot send both name and price parameters")
+    end
+
+    it "returns an error when no parameters are sent" do
+      get "/api/v1/items/find_all"
+
+      expect(response).not_to be_successful
+      expect(response.status).to eq(400)
+
+      response_data = parsed_response
+
+      expect(response_data).to have_key(:error)
+      expect(response_data[:error]).to eq("Parameter cannot be missing or empty")
+    end
+
+    it "returns an error when name parameter is empty" do
+      get "/api/v1/items/find_all?name="
+
+      expect(response).not_to be_successful
+      expect(response.status).to eq(400)
+
+      response_data = parsed_response
+
+      expect(response_data).to have_key(:error)
+      expect(response_data[:error]).to eq("Parameter cannot be missing or empty")
     end
   end
 end

@@ -37,6 +37,7 @@ class Api::V1::ItemsController < ApplicationController
   def find
     if params[:name].present? && (params[:min_price].present? || params[:max_price].present?)
       render json: {error: "Cannot send both name and price parameters"}, status: :bad_request
+      return
     elsif params[:name].present?
       item = Item.where("name ILIKE ?", "%#{params[:name]}%").order(:name).first
     elsif params[:min_price].present? && params[:max_price].present?
@@ -58,7 +59,22 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def find_all
-    items = Item.where("name ILIKE ?", "%#{params[:name]}%")
+    if params[:name].present? && (params[:min_price].present? || params[:max_price].present?)
+      render json: {error: "Cannot send both name and price parameters"}, status: :bad_request
+      return
+    elsif params[:name].present?
+      items = Item.where("name ILIKE ?", "%#{params[:name]}%").order(:name)
+    elsif params[:min_price].present? && params[:max_price].present?
+      items = Item.where("unit_price >= ? AND unit_price <= ?", params[:min_price], params[:max_price]).order(:unit_price)
+    elsif params[:min_price].present?
+      items = Item.where("unit_price >= ?", params[:min_price]).order(:unit_price)
+    elsif params[:max_price].present?
+      items = Item.where("unit_price <= ?", params[:max_price]).order(:unit_price)
+    else
+      render json: {error: "Parameter cannot be missing or empty"}, status: :bad_request
+      return
+    end
+
     render json: ItemSerializer.new(items)
   end
 

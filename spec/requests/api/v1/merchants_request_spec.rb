@@ -114,6 +114,30 @@ RSpec.describe "Merchants API", type: :request do
         name: merchant3.name
       )
     end
+
+    it "returns an error when no parameters are sent" do
+      get "/api/v1/merchants/find"
+
+      expect(response).not_to be_successful
+      expect(response.status).to eq(400)
+
+      response_data = parsed_response
+
+      expect(response_data).to have_key(:error)
+      expect(response_data[:error]).to eq("Parameter cannot be missing or empty")
+    end
+
+    it "returns an error when name parameter is empty" do
+      get "/api/v1/merchants/find?name="
+
+      expect(response).not_to be_successful
+      expect(response.status).to eq(400)
+
+      response_data = parsed_response
+
+      expect(response_data).to have_key(:error)
+      expect(response_data[:error]).to eq("Parameter cannot be missing or empty")
+    end
   end
 
   describe "GET /api/v1/merchants/find_all" do
@@ -155,6 +179,30 @@ RSpec.describe "Merchants API", type: :request do
       # Ensure the merchants are returned in alphabetical order
       expect(response_merchants[0][:attributes][:name]).to eq(merchant3.name)
       expect(response_merchants[1][:attributes][:name]).to eq(merchant1.name)
+    end
+
+    it "returns an error when no parameters are sent" do
+      get "/api/v1/merchants/find_all"
+
+      expect(response).not_to be_successful
+      expect(response.status).to eq(400)
+
+      response_data = parsed_response
+
+      expect(response_data).to have_key(:error)
+      expect(response_data[:error]).to eq("Parameter cannot be missing or empty")
+    end
+
+    it "returns an error when name parameter is empty" do
+      get "/api/v1/merchants/find_all?name="
+
+      expect(response).not_to be_successful
+      expect(response.status).to eq(400)
+
+      response_data = parsed_response
+
+      expect(response_data).to have_key(:error)
+      expect(response_data[:error]).to eq("Parameter cannot be missing or empty")
     end
   end
 end
