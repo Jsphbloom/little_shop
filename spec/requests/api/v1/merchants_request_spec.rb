@@ -146,6 +146,33 @@ RSpec.describe "Merchants API", type: :request do
       end
     end
 
+    describe "Non-RESTful search endpoint for Merchants" do
+      describe "GET /api/v1/merchants/find_all" do
+        context "with a valid name fragment" do
+          it "returns all matching merchants" do
+            m1 = create(:merchant, name: "Logan's Store")
+            m2 = create(:merchant, name: "Logan's Shop")
+            create(:merchant, name: "Alec's Store")
+            get "/api/v1/merchants/find_all", params: {name: "logan"}
+            expect(response).to be_successful
+            body = parsed_response
+            expect(body[:data]).to be_an(Array)
+            expect(body[:data].count).to eq(2)
+            body[:data].each do |merchant|
+              expect(merchant[:attributes][:name].downcase).to include("logan")
+            end
+          end
+        end
+
+        context "with missing or empty name" do
+          it "returns a bad_request status" do
+            get "/api/v1/merchants/find_all", params: {name: ""}
+            expect(response).to have_http_status(:bad_request)
+          end
+        end
+      end
+    end
+
     describe "POST /api/v1/merchants" do
       it "can create a new merchant" do
         merchant_params = {name: Faker::Commerce.vendor}

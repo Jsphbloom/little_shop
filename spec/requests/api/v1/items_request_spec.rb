@@ -284,6 +284,54 @@ RSpec.describe "Items API", type: :request do
     end
   end
 
+  describe "Non-RESTful search endpoints for Items" do
+    describe "GET /api/v1/items/find" do
+      context "with valid name search" do
+        it "returns the first matching item" do
+          item = create(:item, name: "UniqueProduct")
+          create(:item, name: "Other Product")
+          get "/api/v1/items/find", params: {name: "unique"}
+          expect(response).to be_successful
+          body = parsed_response
+          expect(body[:data]).to have_key(:id)
+          expect(body[:data][:attributes][:name]).to eq(item.name)
+        end
+      end
+
+      context "with missing or empty name" do
+        it "returns a bad_request status" do
+          get "/api/v1/items/find", params: {name: ""}
+          expect(response).to have_http_status(:bad_request)
+        end
+      end
+    end
+
+    describe "GET /api/v1/items/find_all" do
+      context "with valid name search" do
+        it "returns all matching items" do
+          item1 = create(:item, name: "Gadget Pro")
+          item2 = create(:item, name: "Gadget Mini")
+          create(:item, name: "Widget")
+          get "/api/v1/items/find_all", params: {name: "gadget"}
+          expect(response).to be_successful
+          body = parsed_response
+          expect(body[:data]).to be_an(Array)
+          expect(body[:data].count).to eq(2)
+          body[:data].each do |record|
+            expect(record[:attributes][:name].downcase).to include("gadget")
+          end
+        end
+      end
+
+      context "with missing or empty name" do
+        it "returns a bad_request status" do
+          get "/api/v1/items/find_all", params: {name: ""}
+          expect(response).to have_http_status(:bad_request)
+        end
+      end
+    end
+  end
+
   describe "sad paths" do
     it "will gracefully handle get with a nonexistent item id" do
       get "/api/v1/items/8923987297"
