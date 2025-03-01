@@ -135,8 +135,8 @@ RSpec.describe "Items API", type: :request do
     end
   end
 
-  describe "create" do
-    it "POST /api/v1/items/" do
+  describe "POST /api/v1/items/" do
+    it "can create new items" do
       create(:merchant)
       item_params = {
         name: Faker::Commerce.product_name,
@@ -182,12 +182,13 @@ RSpec.describe "Items API", type: :request do
   describe "PUT /api/v1/items/:id" do
     it "can update an existing item" do
       item = create(:item)
+      create(:merchant)
 
       item_params = {
         name: Faker::Commerce.product_name,
         description: Faker::Commerce.material,
         unit_price: Faker::Commerce.price,
-        merchant_id: Merchant.all.sample.id
+        merchant_id: Merchant.last.id
       }
       headers = {"CONTENT_TYPE" => "application/json"}
 
@@ -226,6 +227,46 @@ RSpec.describe "Items API", type: :request do
       expect(item.unit_price).to eq(item_params[:unit_price])
       expect(item.merchant_id).to eq(item_params[:merchant_id])
     end
+
+    it "can update an existing item with only partial data" do
+      item = create(:item)
+      create(:merchant)
+
+      item_params = {unit_price: Faker::Commerce.price}
+      headers = {"CONTENT_TYPE" => "application/json"}
+
+      put "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: item_params)
+
+      expect(response).to be_successful
+      expect(response.status).to eq(200)
+
+      item = Item.find(item.id)
+
+      expect(item).to have_attributes(item_params)
+
+      response_data = parsed_response
+
+      expect(response_data[:data]).to include(
+        id: item.id.to_s,
+        type: "item"
+      )
+
+      expect(response_data).to have_key(:data)
+      expect(response_data[:data]).to be_a(Hash)
+
+      response_item = response_data[:data]
+
+      expect(response_item).to have_key(:id)
+      expect(response_item[:id]).to be_a(String)
+
+      expect(response_item).to have_key(:type)
+      expect(response_item[:type]).to eq("item")
+
+      expect(response_item).to have_key(:attributes)
+      expect(response_item[:attributes]).to be_a(Hash)
+      expect(response_data[:data][:attributes]).to include(item_params)
+      expect(item.unit_price).to eq(item_params[:unit_price])
+    end
   end
 
   describe "DELETE /api/v1/items/:id" do
@@ -242,7 +283,7 @@ RSpec.describe "Items API", type: :request do
   end
 
   describe "sad paths" do
-    it "will gracefully handle a nonexistent item id" do
+    it "will gracefully handle get with a nonexistent item id" do
       get "/api/v1/items/8923987297"
 
       expect(response).not_to be_successful
@@ -254,7 +295,7 @@ RSpec.describe "Items API", type: :request do
       expect(response_data[:message]).to eq("Couldn't find Item with 'id'=8923987297")
     end
 
-    it "will gracefully handle an invalid item id" do
+    it "will gracefully handle get with an invalid item id" do
       get "/api/v1/items/string-instead-of-integer"
 
       expect(response).not_to be_successful
@@ -266,7 +307,7 @@ RSpec.describe "Items API", type: :request do
       expect(response_data[:message]).to eq("Couldn't find Item with 'id'=string-instead-of-integer")
     end
 
-    it "will gracefully handle if name isn't provided" do
+    it "will gracefully handle create if name isn't provided" do
       post "/api/v1/items", headers: headers, params: JSON.generate({})
 
       expect(response).not_to be_successful
@@ -274,13 +315,8 @@ RSpec.describe "Items API", type: :request do
 
       response_data = parsed_response
 
-      expect(response_data).to have_key(:message)
-      expect(response_data[:message]).to be_a(String)
-      expect(response_data[:message]).to eq("param is missing or the value is empty: item")
-
-      expect(response_data).to have_key(:errors)
-      expect(response_data[:errors]).to be_a(Array)
       expect(response_data[:errors].first).to eq("422")
+      expect(response_data[:message]).to eq("param is missing or the value is empty: item")
     end
 
     it "will gracefully handle update if params aren't provided" do
@@ -290,20 +326,74 @@ RSpec.describe "Items API", type: :request do
 
       expect(response).not_to be_successful
       expect(response.status).to eq(422)
+
+      response_data = parsed_response
+
+      expect(response_data[:errors].first).to eq("422")
+      expect(response_data[:message]).to eq("param is missing or the value is empty: item")
+    end
+
+    it "will gracefully handle update with a nonexistent item id" do
+      create(:merchant)
+
+      put "/api/v1/items/12435678912354", headers: headers, params: JSON.generate(item: {
+        name: Faker::Commerce.product_name,
+        description: Faker::Commerce.material,
+        unit_price: Faker::Commerce.price,
+        merchant_id: Merchant.last.id
+      })
+
+      expect(response).not_to be_successful
+      expect(response.status).to eq(404)
+
+      response_data = parsed_response
+
+      expect(response_data[:errors].first).to eq("404")
+      expect(response_data[:message]).to eq("Couldn't find Item with 'id'=12435678912354")
+    end
+
+    it "will gracefully handle update with a nonexistent merchant id" do
+      item = create(:item)
+
+      headers = {"CONTENT_TYPE" => "application/json"}
+
+      put "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: {merchant_id: 999999999999})
+
+      expect(response).not_to be_successful
+      expect(response.status).to eq(404)
+
+      response_data = parsed_response
+
+      expect(response_data[:errors].first).to eq("404")
+      expect(response_data[:message]).to eq("Couldn't find Merchant with 'id'=999999999999")
     end
 
     it "will gracefully handle update with invalid merchant id" do
       item = create(:item)
 
-      put "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: {merchant_id: 999999999999})
+      headers = {"CONTENT_TYPE" => "application/json"}
+
+      put "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: {merchant_id: "string-instead-of-integer"})
 
       expect(response).not_to be_successful
-      expect(response.status).to eq(422)
+      expect(response.status).to eq(404)
+
+      response_data = parsed_response
+
+      expect(response_data[:errors].first).to eq("404")
+      expect(response_data[:message]).to eq("Couldn't find Merchant with 'id'=string-instead-of-integer")
     end
 
-    it "returns not found when deleting a non-existent item" do
+    it "will gracefully handle delete with a nonexistent item" do
       delete "/api/v1/items/0"
-      expect(response).to have_http_status(:not_found)
+
+      expect(response).not_to be_successful
+      expect(response.status).to eq(404)
+
+      response_data = parsed_response
+
+      expect(response_data[:errors].first).to eq("404")
+      expect(response_data[:message]).to eq("Couldn't find Item with 'id'=0")
     end
   end
 end
