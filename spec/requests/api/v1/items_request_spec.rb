@@ -296,6 +296,40 @@ RSpec.describe "Items API", type: :request do
           expect(body[:data]).to have_key(:id)
           expect(body[:data][:attributes][:name]).to eq(item.name)
         end
+
+        it "returns the first matching item in alphabetical order" do
+          i1 = create(:item, name: "Turing Machine")
+          i2 = create(:item, name: "Ring of Fire")
+          # "Ring of Fire" comes before "Turing Machine" alphabetically
+          get "/api/v1/items/find", params: {name: "ring"}
+          expect(response).to be_successful
+          body = parsed_response
+          expect(body[:data][:attributes][:name]).to eq(i2.name)
+        end
+      end
+
+      context "with valid price search" do
+        it "returns the lowest-priced matching item" do
+          i1 = create(:item, name: "Gizmo A", unit_price: 100.0)
+          i2 = create(:item, name: "Gizmo B", unit_price: 50.0)
+          get "/api/v1/items/find", params: {min_price: 40, max_price: 150}
+          expect(response).to be_successful
+          body = parsed_response
+          # find_item orders by unit_price so the item with unit_price 50.0 comes first
+          expect(body[:data][:attributes][:name]).to eq(i2.name)
+        end
+
+        it "returns error if both name and price parameters are sent" do
+          get "/api/v1/items/find", params: {name: "ring", min_price: 10}
+          expect(response).to have_http_status(:bad_request)
+        end
+      end
+
+      context "with missing search parameters" do
+        it "returns bad_request" do
+          get "/api/v1/items/find", params: {}
+          expect(response).to have_http_status(:bad_request)
+        end
       end
 
       context "with missing or empty name" do
