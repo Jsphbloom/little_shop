@@ -35,14 +35,19 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def find
-    if params[:name]
+    if params[:name].present? && (params[:min_price].present? || params[:max_price].present?)
+      render json: {error: "Cannot send both name and price parameters"}, status: :bad_request
+    elsif params[:name].present?
       item = Item.where("name ILIKE ?", "%#{params[:name]}%").order(:name).first
-    elsif params[:min_price] && params[:max_price]
+    elsif params[:min_price].present? && params[:max_price].present?
       item = Item.where("unit_price >= ? AND unit_price <= ?", params[:min_price], params[:max_price]).order(:unit_price).first
-    elsif params[:min_price]
+    elsif params[:min_price].present?
       item = Item.where("unit_price >= ?", params[:min_price]).order(:unit_price).first
-    elsif params[:max_price]
+    elsif params[:max_price].present?
       item = Item.where("unit_price <= ?", params[:max_price]).order(:unit_price).first
+    else
+      render json: {error: "Parameter cannot be missing or empty"}, status: :bad_request
+      return
     end
 
     if item
