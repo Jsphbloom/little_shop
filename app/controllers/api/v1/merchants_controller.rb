@@ -44,6 +44,26 @@ class Api::V1::MerchantsController < ApplicationController
     Merchant.find(params[:id]).destroy
   end
 
+  def find
+    if params[:name].blank?
+      render json: {error: "Parameter cannot be missing or empty"}, status: :bad_request and return
+    end
+    merchant = Merchant.where("name ILIKE ?", "%#{params[:name]}%").order(:name).first
+    if merchant
+      render json: MerchantSerializer.new(merchant)
+    else
+      render json: {error: "Merchant not found"}, status: :not_found
+    end
+  end
+
+  def find_all
+    if params[:name].blank?
+      render json: {error: "Parameter cannot be missing or empty"}, status: :bad_request and return
+    end
+    merchants = Merchant.where("name ILIKE ?", "%#{params[:name]}%").order(:name)
+    render json: MerchantSerializer.new(merchants)
+  end
+
   private
 
   def merchant_params
