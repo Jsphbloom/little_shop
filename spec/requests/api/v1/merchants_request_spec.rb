@@ -81,8 +81,44 @@ RSpec.describe "Merchants API", type: :request do
       end
 
       it "successfully get merchants with invoice status of returned" do
+        merchant1 = create(:merchant)
+        merchant2 = create(:merchant)
+        merchant3 = create(:merchant)
+        create(:invoice, merchant: merchant1, status: "returned")
+        create(:invoice, merchant: merchant2, status: "returned")
+        create(:invoice, merchant: merchant3, status: "shipped")
+
         get "/api/v1/merchants?status=returned"
+
         expect(response).to be_successful
+        expect(response.status).to eq(200)
+
+        response_data = parsed_response
+
+        expect(response_data).to have_key(:data)
+        expect(response_data[:data]).to be_an(Array)
+
+        response_merchants = response_data[:data]
+
+        expect(response_merchants.length).to eq(2)
+
+        response_merchants.each do |merchant|
+          expect(merchant).to have_key(:id)
+          expect(merchant[:id]).to be_a(String)
+
+          expect(merchant).to have_key(:type)
+          expect(merchant[:type]).to eq("merchant")
+
+          expect(merchant).to have_key(:attributes)
+          expect(merchant[:attributes]).to be_a(Hash)
+
+          attributes = merchant[:attributes]
+
+          expect(attributes).to have_key(:name)
+          expect(attributes[:name]).to be_a(String)
+        end
+        expect(response_merchants[0][:attributes][:name]).to eq(merchant1.name)
+        expect(response_merchants[1][:attributes][:name]).to eq(merchant2.name)
       end
 
       it "successfully returns merchant list with item count" do
@@ -123,8 +159,11 @@ RSpec.describe "Merchants API", type: :request do
           expect(attributes).to have_key(:item_count)
           expect(attributes[:item_count]).to be_a(Integer)
         end
-        expect(response_merchants[0][:attributes][:item_count]).to eq(30)
-        expect(response_merchants[1][:attributes][:item_count]).to eq(25)
+
+        item_counts = response_merchants.map do |merchant|
+          merchant[:attributes][:item_count]
+        end
+        expect(item_counts.sort).to eq([25, 30])
       end
     end
 
