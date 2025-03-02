@@ -22,5 +22,6 @@ class Merchant < ApplicationRecord
     joins(:items)
       .select("merchants.id, merchants.name, COUNT(items.id) AS item_count")
       .group("merchants.id, merchants.name")
+      .order("merchants.id")
   end
 end
