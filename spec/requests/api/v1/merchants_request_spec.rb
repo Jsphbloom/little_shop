@@ -334,5 +334,31 @@ RSpec.describe "Merchants API", type: :request do
         end
       end
     end
+
+    context "Additional tests for non‑RESTful merchants search" do
+      it "passes a valid name query and returns a merchant" do
+        merchant = create(:merchant, name: "Acme Corp")
+        get "/api/v1/merchants/find", params: {name: "Acme"}
+        body = parsed_response
+        expect(body[:data][:attributes][:name]).to eq(merchant.name)
+      end
+
+      it "returns not found when no merchant matches the valid name query" do
+        get "/api/v1/merchants/find", params: {name: "nonexistent"}
+        expect(response).to have_http_status(:not_found)
+      end
+
+      it "returns bad_request when missing parameters for find" do
+        get "/api/v1/merchants/find", params: {}
+        expect(response).to have_http_status(:bad_request)
+      end
+
+      # For find_all, when no records are found, an empty array is returned.
+      it "returns an empty array for find_all when no merchant matches" do
+        get "/api/v1/merchants/find_all", params: {name: "nonexistent"}
+        body = parsed_response
+        expect(body[:data]).to eq([])
+      end
+    end
   end
 end

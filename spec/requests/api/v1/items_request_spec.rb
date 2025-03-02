@@ -480,5 +480,71 @@ RSpec.describe "Items API", type: :request do
         expect(response).to have_http_status(:bad_request)
       end
     end
+
+    context "Additional tests for non‑RESTful items search" do
+      it "passes a valid name query and returns an item" do
+        item = create(:item, name: "Super Gadget")
+        get "/api/v1/items/find", params: {name: "Super"}
+        body = parsed_response
+        expect(body[:data][:attributes][:name]).to eq(item.name)
+      end
+
+      it "returns 404 when no item matches a valid name query" do
+        get "/api/v1/items/find", params: {name: "nonexistent"}
+        expect(response).to have_http_status(:not_found)
+      end
+
+      it "returns bad_request when missing all search parameters" do
+        get "/api/v1/items/find", params: {}
+        expect(response).to have_http_status(:bad_request)
+      end
+
+      it "returns the first matching item for only min_price query" do
+        item1 = create(:item, name: "Budget Widget", unit_price: 25.0)
+        item2 = create(:item, name: "Premium Widget", unit_price: 75.0)
+        get "/api/v1/items/find", params: {min_price: 50}
+        body = parsed_response
+        expect(body[:data][:attributes][:unit_price]).to be >= 50
+        expect(body[:data][:attributes][:name]).to eq(item2.name)
+      end
+
+      it "returns the first matching item for only max_price query" do
+        item1 = create(:item, name: "Cheap Widget", unit_price: 15.0)
+        item2 = create(:item, name: "Standard Widget", unit_price: 55.0)
+        get "/api/v1/items/find", params: {max_price: 20}
+        body = parsed_response
+        expect(body[:data][:attributes][:unit_price]).to be <= 20
+        expect(body[:data][:attributes][:name]).to eq(item1.name)
+      end
+
+      it "returns bad_request when name and min_price are both provided" do
+        get "/api/v1/items/find", params: {name: "Test", min_price: 50}
+        expect(response).to have_http_status(:bad_request)
+      end
+
+      it "returns bad_request when name and max_price are both provided" do
+        get "/api/v1/items/find", params: {name: "Test", max_price: 150}
+        expect(response).to have_http_status(:bad_request)
+      end
+
+      it "returns bad_request when name, min_price, and max_price are provided" do
+        get "/api/v1/items/find", params: {name: "Test", min_price: 50, max_price: 250}
+        expect(response).to have_http_status(:bad_request)
+      end
+
+      it "returns not found when a min_price query yields no results" do
+        create(:item, unit_price: 100.0)
+        get "/api/v1/items/find", params: {min_price: 1000}
+        expect(response).not_to be_successful
+        expect(response.status).to eq(404)
+      end
+
+      it "returns an empty array for find_all when a max_price query yields no results" do
+        create(:item, unit_price: 50.0)
+        get "/api/v1/items/find_all", params: {max_price: 10}
+        body = parsed_response
+        expect(body[:data]).to eq([])
+      end
+    end
   end
 end
