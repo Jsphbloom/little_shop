@@ -383,57 +383,147 @@ RSpec.describe "Merchants API", type: :request do
     end
   end
 
-  describe "Non-RESTful search endpoints for Merchants" do
-    context "with faker-generated merchant name" do
-      it "finds the merchant using a substring of the generated name" do
-        generated_name = Faker::Commerce.vendor
-        merchant = create(:merchant, name: generated_name)
-        substring = generated_name[0, 3].downcase
+  describe "non-RESTful endpoints" do
+    describe "GET /api/v1/merchants/find" do
+      it "finds the merchant using a substring of the name" do
+        merchant = create(:merchant)
+        substring = merchant.name[0..3].downcase
+
         get "/api/v1/merchants/find", params: {name: substring}
-        body = parsed_response
-        expect(body[:data][:attributes][:name]).to eq(merchant.name)
+
+        expect(response).to be_successful
+        expect(response.status).to eq(200)
+
+        response_data = parsed_response
+
+        expect(response_data).to have_key(:data)
+        expect(response_data[:data]).to be_a(Hash)
+
+        expect(response_data[:data]).to include(
+          id: merchant.id.to_s,
+          type: "merchant"
+        )
+
+        expect(response_data[:data]).to have_key(:attributes)
+        expect(response_data[:data][:attributes]).to be_a(Hash)
+
+        expect(response_data[:data][:attributes]).to have_key(:name)
+        expect(response_data[:data][:attributes][:name]).to eq(merchant.name)
       end
 
-      it "returns an array of matching merchants using Faker values" do
-        generated_name1 = Faker::Commerce.vendor
-        generated_name2 = Faker::Commerce.vendor
-        create(:merchant, name: generated_name1)
-        create(:merchant, name: generated_name2)
-        # Use a substring from one of the generated names
-        substring = generated_name1[0, 2].downcase
-        get "/api/v1/merchants/find_all", params: {name: substring}
-        body = parsed_response
-        expect(body[:data]).to be_an(Array)
-        expect(body[:data].length).to be >= 1
-        body[:data].each do |merch|
-          expect(merch[:attributes][:name].downcase).to include(substring)
+      describe "sad paths" do
+        it "gracefully handles no merchant found" do
+          get "/api/v1/merchants/find", params: {name: "ILI"}
+
+          expect(response).to be_successful
+          expect(response.status).to eq(200)
+
+          response_data = parsed_response
+
+          expect(response_data).to have_key(:data)
+          expect(response_data[:data]).to eq { {} }
+        end
+
+        it "gracefully handles missing parameter" do
+          get "/api/v1/merchants/find", params: {}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(422)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("422")
+          expect(response_data[:message]).to eq("param is missing or the value is empty: name")
+        end
+
+        it "gracefully handles empty parameter" do
+          get "/api/v1/merchants/find", params: {name: ""}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(422)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("422")
+          expect(response_data[:message]).to eq("param is missing or the value is empty: name")
         end
       end
     end
+  end
 
-    context "Additional tests for non‑RESTful merchants search" do
-      it "passes a valid name query and returns a merchant" do
-        merchant = create(:merchant, name: "Acme Corp")
-        get "/api/v1/merchants/find", params: {name: "Acme"}
-        body = parsed_response
-        expect(body[:data][:attributes][:name]).to eq(merchant.name)
+  describe "GET /api/v1/merchants/find_all" do
+    it "finds the merchant using a substring of the name" do
+      create(:merchant, name: "Logan's Shop")
+      create(:merchant, name: "Logan's Store")
+      create_list(:merchant, 25)
+
+      get "/api/v1/merchants/find_all", params: {name: "Logan"}
+
+      expect(response).to be_successful
+      expect(response.status).to eq(200)
+
+      response_data = parsed_response
+
+      expect(response_data).to have_key(:data)
+      expect(response_data[:data]).to be_an(Array)
+
+      response_merchants = response_data[:data]
+
+      expect(response_merchants.length).to eq(2)
+
+      response_merchants.each do |merchant|
+        expect(merchant).to have_key(:id)
+        expect(merchant[:id]).to be_a(String)
+
+        expect(merchant).to have_key(:type)
+        expect(merchant[:type]).to eq("merchant")
+
+        expect(merchant).to have_key(:attributes)
+        expect(merchant[:attributes]).to be_a(Hash)
+
+        attributes = merchant[:attributes]
+
+        expect(attributes).to have_key(:name)
+        expect(attributes[:name]).to be_a(String)
+        expect(attributes[:name]).to include("Logan")
+      end
+    end
+
+    describe "sad paths" do
+      it "gracefully handles no merchants found" do
+        get "/api/v1/merchants/find_all", params: {name: "ILI"}
+
+        expect(response).to be_successful
+        expect(response.status).to eq(200)
+
+        response_data = parsed_response
+
+        expect(response_data).to have_key(:data)
+        expect(response_data[:data]).to eq { [] }
       end
 
-      it "returns not found when no merchant matches the valid name query" do
-        get "/api/v1/merchants/find", params: {name: "nonexistent"}
-        expect(response).to have_http_status(:not_found)
+      it "gracefully handles missing parameter" do
+        get "/api/v1/merchants/find_all", params: {}
+
+        expect(response).not_to be_successful
+        expect(response.status).to eq(422)
+
+        response_data = parsed_response
+
+        expect(response_data[:errors].first).to eq("422")
+        expect(response_data[:message]).to eq("param is missing or the value is empty: name")
       end
 
-      it "returns bad_request when missing parameters for find" do
-        get "/api/v1/merchants/find", params: {}
-        expect(response).to have_http_status(:bad_request)
-      end
+      it "gracefully handles empty parameter" do
+        get "/api/v1/merchants/find_all", params: {name: ""}
 
-      # For find_all, when no records are found, an empty array is returned.
-      it "returns an empty array for find_all when no merchant matches" do
-        get "/api/v1/merchants/find_all", params: {name: "nonexistent"}
-        body = parsed_response
-        expect(body[:data]).to eq([])
+        expect(response).not_to be_successful
+        expect(response.status).to eq(422)
+
+        response_data = parsed_response
+
+        expect(response_data[:errors].first).to eq("422")
+        expect(response_data[:message]).to eq("param is missing or the value is empty: name")
       end
     end
   end
