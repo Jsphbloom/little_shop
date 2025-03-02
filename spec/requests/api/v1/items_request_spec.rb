@@ -534,45 +534,136 @@ RSpec.describe "Items API", type: :request do
       end
 
       describe "sad paths" do
-        it "returns not found for a min_price too high" do
-          create(:item, unit_price: 100.0)
-          get "/api/v1/items/find", params: {min_price: 1000}
-          expect(response).not_to be_successful
-          expect(response.status).to eq(404)
-          body = parsed_response
-          expect(body[:error] || body[:errors]).to include("not found").or include("404")
+        it "gracefully handles no item found by name" do
+          get "/api/v1/items/find", params: {name: "ILI"}
+
+          expect(response).to be_successful
+          expect(response.status).to eq(200)
+
+          response_data = parsed_response
+
+          expect(response_data).to have_key(:data)
+          expect(response_data[:data]).to eq({})
         end
 
-        it "returns a bad_request when sending name and min_price" do
-          get "/api/v1/items/find", params: {name: "ring", min_price: 50}
-          expect(response).to have_http_status(:bad_request)
+        it "gracefully handles no item found by min_price" do
+          get "/api/v1/items/find", params: {min_price: 10}
+
+          expect(response).to be_successful
+          expect(response.status).to eq(200)
+
+          response_data = parsed_response
+
+          expect(response_data).to have_key(:data)
+          expect(response_data[:data]).to eq({})
         end
 
-        it "returns a bad_request when sending name and max_price" do
-          get "/api/v1/items/find", params: {name: "ring", max_price: 150}
-          expect(response).to have_http_status(:bad_request)
+        it "gracefully handles no item found by max_price" do
+          get "/api/v1/items/find", params: {max_price: 20}
+
+          expect(response).to be_successful
+          expect(response.status).to eq(200)
+
+          response_data = parsed_response
+
+          expect(response_data).to have_key(:data)
+          expect(response_data[:data]).to eq({})
         end
 
-        it "returns a bad_request when sending name, min_price and max_price" do
-          get "/api/v1/items/find", params: {name: "ring", min_price: 50, max_price: 250}
-          expect(response).to have_http_status(:bad_request)
+        it "gracefully handles no item found by min_price and max_price" do
+          get "/api/v1/items/find", params: {min_price: 10, max_price: 20}
+
+          expect(response).to be_successful
+          expect(response.status).to eq(200)
+
+          response_data = parsed_response
+
+          expect(response_data).to have_key(:data)
+          expect(response_data[:data]).to eq({})
         end
 
-        it "returns 404 when no item matches a valid name query" do
-          get "/api/v1/items/find", params: {name: "nonexistent"}
-          expect(response).to have_http_status(:not_found)
-        end
-
-        it "returns bad_request when no search parameter is provided" do
+        it "gracefully handles missing parameter" do
           get "/api/v1/items/find", params: {}
-          expect(response).to have_http_status(:bad_request)
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("param is missing or the value is empty: name")
         end
 
-        it "returns 404 when a min_price query yields no results" do
-          create(:item, unit_price: 100.0)
-          get "/api/v1/items/find", params: {min_price: 1000}
+        it "gracefully handles empty name parameter" do
+          get "/api/v1/items/find", params: {name: ""}
+
           expect(response).not_to be_successful
-          expect(response.status).to eq(404)
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("param is missing or the value is empty: name")
+        end
+
+        it "gracefully handles empty min_price parameter" do
+          get "/api/v1/items/find", params: {min_price: ""}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("param is missing or the value is empty: min_price")
+        end
+
+        it "gracefully handles empty max_price parameter" do
+          get "/api/v1/items/find", params: {max_price: ""}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("param is missing or the value is empty: max_price")
+        end
+
+        it "gracefully handles sending name and min_price" do
+          get "/api/v1/items/find", params: {name: "ring", min_price: 50}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("Cannot send both name and price parameters")
+        end
+
+        it "gracefully handles sending name and max_price" do
+          get "/api/v1/items/find", params: {name: "ring", max_price: 150}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("Cannot send both name and price parameters")
+        end
+
+        it "gracefully handles sending name, min_price and max_price" do
+          get "/api/v1/items/find", params: {name: "ring", min_price: 50, max_price: 250}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("Cannot send both name and price parameters")
         end
       end
     end
@@ -591,19 +682,20 @@ RSpec.describe "Items API", type: :request do
         body[:data].each do |it|
           expect(it[:attributes][:name].downcase).to include(substring)
         end
-        it "returns an empty array for find_all with a max_price too low" do
-          create(:item, unit_price: 50.0)
-          get "/api/v1/items/find_all", params: {max_price: 10}
-          body = parsed_response
-          expect(body[:data]).to eq([])
-        end
+      end
 
-        it "returns an empty array for find_all when a max_price query yields no results" do
-          create(:item, unit_price: 50.0)
-          get "/api/v1/items/find_all", params: {max_price: 10}
-          body = parsed_response
-          expect(body[:data]).to eq([])
-        end
+      it "returns an empty array for find_all with a max_price too low" do
+        create(:item, unit_price: 50.0)
+        get "/api/v1/items/find_all", params: {max_price: 10}
+        body = parsed_response
+        expect(body[:data]).to eq([])
+      end
+
+      it "returns an empty array for find_all when a max_price query yields no results" do
+        create(:item, unit_price: 50.0)
+        get "/api/v1/items/find_all", params: {max_price: 10}
+        body = parsed_response
+        expect(body[:data]).to eq([])
       end
     end
   end
