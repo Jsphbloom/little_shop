@@ -425,5 +425,60 @@ RSpec.describe "Items API", type: :request do
         end
       end
     end
+
+    context "with valid price query using only min_price" do
+      it "returns the first item with unit_price >= min_price" do
+        item1 = create(:item, name: "Budget Gizmo", unit_price: 30.0)
+        item2 = create(:item, name: "Standard Gizmo", unit_price: 60.0)
+        get "/api/v1/items/find", params: {min_price: 50}
+        body = parsed_response
+        expect(body[:data][:attributes][:name]).to eq(item2.name)
+      end
+    end
+
+    context "with valid price query using only max_price" do
+      it "returns the first item with unit_price <= max_price" do
+        item1 = create(:item, name: "Cheap Widget", unit_price: 20.0)
+        item2 = create(:item, name: "Affordable Widget", unit_price: 40.0)
+        get "/api/v1/items/find", params: {max_price: 30}
+        body = parsed_response
+        expect(body[:data][:attributes][:name]).to eq(item1.name)
+      end
+    end
+
+    context "when search yields zero results (boundary values)" do
+      it "returns not found for a min_price too high" do
+        create(:item, unit_price: 100.0)
+        get "/api/v1/items/find", params: {min_price: 1000}
+        expect(response).not_to be_successful
+        expect(response.status).to eq(404)
+        body = parsed_response
+        expect(body[:error] || body[:errors]).to include("not found").or include("404")
+      end
+
+      it "returns an empty array for find_all with a max_price too low" do
+        create(:item, unit_price: 50.0)
+        get "/api/v1/items/find_all", params: {max_price: 10}
+        body = parsed_response
+        expect(body[:data]).to eq([])
+      end
+    end
+
+    context "when both name and any price parameter(s) are sent" do
+      it "returns a bad_request when sending name and min_price" do
+        get "/api/v1/items/find", params: {name: "ring", min_price: 50}
+        expect(response).to have_http_status(:bad_request)
+      end
+
+      it "returns a bad_request when sending name and max_price" do
+        get "/api/v1/items/find", params: {name: "ring", max_price: 150}
+        expect(response).to have_http_status(:bad_request)
+      end
+
+      it "returns a bad_request when sending name, min_price and max_price" do
+        get "/api/v1/items/find", params: {name: "ring", min_price: 50, max_price: 250}
+        expect(response).to have_http_status(:bad_request)
+      end
+    end
   end
 end
