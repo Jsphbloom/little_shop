@@ -48,6 +48,18 @@ class Api::V1::ItemsController < ApplicationController
       raise ActionController::ParameterMissing.new(p) if !params[p].nil? && params[p].blank?
     end
 
+    [:min_price, :max_price].each do |p|
+      if params[p] && params[p].to_f < 0
+        render json: {message: "#{p} cannot be less than 0", errors: ["400"]}, status: :bad_request
+        return
+      end
+    end
+
+    if params[:min_price] && params[:max_price] && params[:min_price].to_f > params[:max_price].to_f
+      render json: {message: "min_price cannot be greater than max price", errors: ["400"]}, status: :bad_request
+      return
+    end
+
     item = if params[:name].present?
       Item.find_by("name ILIKE ?", "%#{params[:name]}%")
     elsif params[:min_price].present? && params[:max_price].present?
@@ -69,7 +81,19 @@ class Api::V1::ItemsController < ApplicationController
     end
 
     [:name, :min_price, :max_price].each do |p|
-      raise ActionController::ParameterMissing.new(p) if params[p].present? && params[p].blank?
+      raise ActionController::ParameterMissing.new(p) if !params[p].nil? && params[p].blank?
+    end
+
+    [:min_price, :max_price].each do |p|
+      if params[p] && params[p].to_f < 0
+        render json: {message: "#{p} cannot be less than 0", errors: ["400"]}, status: :bad_request
+        return
+      end
+    end
+
+    if params[:min_price] && params[:max_price] && params[:min_price].to_f > params[:max_price].to_f
+      render json: {message: "min_price cannot be greater than max price", errors: ["400"]}, status: :bad_request
+      return
     end
 
     items = if params[:name].present?
