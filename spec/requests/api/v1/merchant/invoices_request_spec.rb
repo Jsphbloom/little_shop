@@ -53,4 +53,18 @@ RSpec.describe "Merchant Invoices API", type: :request do
       end
     end
   end
+
+  describe "sad paths" do
+    it "handles nonexistent merchant id gracefully" do
+      get "/api/v1/merchants/8923987297/customers"
+
+      expect(response).not_to be_successful
+      expect(response.status).to eq(404)
+
+      response_data = parsed_response
+
+      expect(response_data[:errors]).to eq(["404"])
+      expect(response_data[:message]).to eq("Couldn't find Merchant with 'id'=8923987297")
+    end
+  end
 end

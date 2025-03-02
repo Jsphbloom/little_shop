@@ -50,7 +50,7 @@ RSpec.describe "Merchant Customers API", type: :request do
   end
 
   describe "sad paths" do
-    it "handles invalid merchant id gracefully" do
+    it "handles nonexistent merchant id gracefully" do
       get "/api/v1/merchants/8923987297/customers"
 
       expect(response).not_to be_successful
