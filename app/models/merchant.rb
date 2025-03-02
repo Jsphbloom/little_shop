@@ -15,7 +15,7 @@ class Merchant < ApplicationRecord
   end
 
   def self.find_by_name_fragment(fragment)
-    where("name ILIKE ?", "%#{fragment}%").first
+    find_by("name ILIKE ?", "%#{fragment}%")
   end
 
   def self.with_item_count
