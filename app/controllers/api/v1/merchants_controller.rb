@@ -20,13 +20,7 @@ class Api::V1::MerchantsController < ApplicationController
   end
 
   def show
-    if params[:name].present?
-      merchant = Merchant.find_by_name_fragment(params[:name])
-      raise ActiveRecord::RecordNotFound.new("Merchant not found") unless merchant
-    else
-      merchant = Merchant.find(params[:id])
-    end
-    render json: MerchantSerializer.new(merchant)
+    render json: MerchantSerializer.new(Merchant.find(params[:id]))
   end
 
   def create
