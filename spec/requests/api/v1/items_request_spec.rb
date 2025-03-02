@@ -482,9 +482,10 @@ RSpec.describe "Items API", type: :request do
     end
 
     context "Additional tests for non‑RESTful items search" do
-      it "passes a valid name query and returns an item" do
-        item = create(:item, name: "Super Gadget")
-        get "/api/v1/items/find", params: {name: "Super"}
+      it "returns an item for a valid name query" do
+        generated_name = Faker::Commerce.product_name
+        item = create(:item, name: generated_name)
+        get "/api/v1/items/find", params: {name: generated_name.split.first}
         body = parsed_response
         expect(body[:data][:attributes][:name]).to eq(item.name)
       end
@@ -494,45 +495,42 @@ RSpec.describe "Items API", type: :request do
         expect(response).to have_http_status(:not_found)
       end
 
-      it "returns bad_request when missing all search parameters" do
+      it "returns bad_request when no search parameter is provided" do
         get "/api/v1/items/find", params: {}
         expect(response).to have_http_status(:bad_request)
       end
 
-      it "returns the first matching item for only min_price query" do
-        item1 = create(:item, name: "Budget Widget", unit_price: 25.0)
-        item2 = create(:item, name: "Premium Widget", unit_price: 75.0)
+      it "returns the correct item when only min_price is provided" do
+        # Create two items with differing prices
+        create(:item, name: Faker::Commerce.product_name, unit_price: 30.0)
+        item_to_find = create(:item, name: Faker::Commerce.product_name, unit_price: 75.0)
         get "/api/v1/items/find", params: {min_price: 50}
         body = parsed_response
         expect(body[:data][:attributes][:unit_price]).to be >= 50
-        expect(body[:data][:attributes][:name]).to eq(item2.name)
+        expect(body[:data][:attributes][:name]).to eq(item_to_find.name)
       end
 
-      it "returns the first matching item for only max_price query" do
-        item1 = create(:item, name: "Cheap Widget", unit_price: 15.0)
-        item2 = create(:item, name: "Standard Widget", unit_price: 55.0)
+      it "returns the correct item when only max_price is provided" do
+        item_to_find = create(:item, name: Faker::Commerce.product_name, unit_price: 15.0)
+        create(:item, name: Faker::Commerce.product_name, unit_price: 55.0)
         get "/api/v1/items/find", params: {max_price: 20}
         body = parsed_response
         expect(body[:data][:attributes][:unit_price]).to be <= 20
-        expect(body[:data][:attributes][:name]).to eq(item1.name)
+        expect(body[:data][:attributes][:name]).to eq(item_to_find.name)
       end
 
-      it "returns bad_request when name and min_price are both provided" do
+      it "returns bad_request when both name and any price parameter are provided" do
         get "/api/v1/items/find", params: {name: "Test", min_price: 50}
         expect(response).to have_http_status(:bad_request)
-      end
 
-      it "returns bad_request when name and max_price are both provided" do
         get "/api/v1/items/find", params: {name: "Test", max_price: 150}
         expect(response).to have_http_status(:bad_request)
-      end
 
-      it "returns bad_request when name, min_price, and max_price are provided" do
         get "/api/v1/items/find", params: {name: "Test", min_price: 50, max_price: 250}
         expect(response).to have_http_status(:bad_request)
       end
 
-      it "returns not found when a min_price query yields no results" do
+      it "returns 404 when a min_price query yields no results" do
         create(:item, unit_price: 100.0)
         get "/api/v1/items/find", params: {min_price: 1000}
         expect(response).not_to be_successful
