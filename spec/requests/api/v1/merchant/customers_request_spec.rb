@@ -16,6 +16,7 @@ RSpec.describe "Merchant Customers API", type: :request do
         get "/api/v1/merchants/#{merchant.id}/customers"
 
         expect(response).to be_successful
+        expect(response.status).to eq(200)
 
         response_data = parsed_response
 
