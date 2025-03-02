@@ -428,11 +428,11 @@ RSpec.describe "Merchants API", type: :request do
           get "/api/v1/merchants/find", params: {}
 
           expect(response).not_to be_successful
-          expect(response.status).to eq(422)
+          expect(response.status).to eq(400)
 
           response_data = parsed_response
 
-          expect(response_data[:errors].first).to eq("422")
+          expect(response_data[:errors].first).to eq("400")
           expect(response_data[:message]).to eq("param is missing or the value is empty: name")
         end
 
@@ -440,11 +440,11 @@ RSpec.describe "Merchants API", type: :request do
           get "/api/v1/merchants/find", params: {name: ""}
 
           expect(response).not_to be_successful
-          expect(response.status).to eq(422)
+          expect(response.status).to eq(400)
 
           response_data = parsed_response
 
-          expect(response_data[:errors].first).to eq("422")
+          expect(response_data[:errors].first).to eq("400")
           expect(response_data[:message]).to eq("param is missing or the value is empty: name")
         end
       end
@@ -506,11 +506,11 @@ RSpec.describe "Merchants API", type: :request do
         get "/api/v1/merchants/find_all", params: {}
 
         expect(response).not_to be_successful
-        expect(response.status).to eq(422)
+        expect(response.status).to eq(400)
 
         response_data = parsed_response
 
-        expect(response_data[:errors].first).to eq("422")
+        expect(response_data[:errors].first).to eq("400")
         expect(response_data[:message]).to eq("param is missing or the value is empty: name")
       end
 
@@ -518,11 +518,11 @@ RSpec.describe "Merchants API", type: :request do
         get "/api/v1/merchants/find_all", params: {name: ""}
 
         expect(response).not_to be_successful
-        expect(response.status).to eq(422)
+        expect(response.status).to eq(400)
 
         response_data = parsed_response
 
-        expect(response_data[:errors].first).to eq("422")
+        expect(response_data[:errors].first).to eq("400")
         expect(response_data[:message]).to eq("param is missing or the value is empty: name")
       end
     end
