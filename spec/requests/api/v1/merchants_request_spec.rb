@@ -324,11 +324,11 @@ RSpec.describe "Merchants API", type: :request do
       post "/api/v1/merchants", headers: headers, params: JSON.generate(merchant: {})
 
       expect(response).not_to be_successful
-      expect(response.status).to eq(422)
+      expect(response.status).to eq(400)
 
       response_data = parsed_response
 
-      expect(response_data[:errors].first).to eq("422")
+      expect(response_data[:errors].first).to eq("400")
       expect(response_data[:message]).to eq("param is missing or the value is empty: merchant")
     end
 
@@ -338,11 +338,11 @@ RSpec.describe "Merchants API", type: :request do
       patch "/api/v1/merchants/#{merchant.id}", headers: headers, params: JSON.generate(merchant: {})
 
       expect(response).not_to be_successful
-      expect(response.status).to eq(422)
+      expect(response.status).to eq(400)
 
       response_data = parsed_response
 
-      expect(response_data[:errors].first).to eq("422")
+      expect(response_data[:errors].first).to eq("400")
       expect(response_data[:message]).to eq("param is missing or the value is empty: merchant")
     end
 
