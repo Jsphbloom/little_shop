@@ -56,7 +56,7 @@ RSpec.describe "Merchant Invoices API", type: :request do
 
   describe "sad paths" do
     it "handles nonexistent merchant id gracefully" do
-      get "/api/v1/merchants/8923987297/customers"
+      get "/api/v1/merchants/8923987297/invoices?status=shipped"
 
       expect(response).not_to be_successful
       expect(response.status).to eq(404)
