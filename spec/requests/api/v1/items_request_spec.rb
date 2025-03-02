@@ -313,11 +313,11 @@ RSpec.describe "Items API", type: :request do
       post "/api/v1/items", headers: headers, params: JSON.generate({})
 
       expect(response).not_to be_successful
-      expect(response.status).to eq(422)
+      expect(response.status).to eq(400)
 
       response_data = parsed_response
 
-      expect(response_data[:errors].first).to eq("422")
+      expect(response_data[:errors].first).to eq("400")
       expect(response_data[:message]).to eq("param is missing or the value is empty: item")
     end
 
@@ -327,11 +327,11 @@ RSpec.describe "Items API", type: :request do
       put "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: {})
 
       expect(response).not_to be_successful
-      expect(response.status).to eq(422)
+      expect(response.status).to eq(400)
 
       response_data = parsed_response
 
-      expect(response_data[:errors].first).to eq("422")
+      expect(response_data[:errors].first).to eq("400")
       expect(response_data[:message]).to eq("param is missing or the value is empty: item")
     end
 
