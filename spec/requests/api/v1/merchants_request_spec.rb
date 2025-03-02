@@ -421,7 +421,7 @@ RSpec.describe "Merchants API", type: :request do
           response_data = parsed_response
 
           expect(response_data).to have_key(:data)
-          expect(response_data[:data]).to eq { {} }
+          expect(response_data[:data]).to eq({})
         end
 
         it "gracefully handles missing parameter" do
@@ -499,7 +499,7 @@ RSpec.describe "Merchants API", type: :request do
         response_data = parsed_response
 
         expect(response_data).to have_key(:data)
-        expect(response_data[:data]).to eq { [] }
+        expect(response_data[:data]).to eq([])
       end
 
       it "gracefully handles missing parameter" do
