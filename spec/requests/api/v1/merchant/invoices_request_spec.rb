@@ -93,7 +93,7 @@ RSpec.describe "Merchant Invoices API", type: :request do
   end
 
   describe "sad paths" do
-    it "handles nonexistent merchant id gracefully" do
+    it "gracefully handles nonexistent merchant id" do
       get "/api/v1/merchants/8923987297/invoices?status=shipped"
 
       expect(response).not_to be_successful
@@ -103,6 +103,44 @@ RSpec.describe "Merchant Invoices API", type: :request do
 
       expect(response_data[:errors]).to eq(["404"])
       expect(response_data[:message]).to eq("Couldn't find Merchant with 'id'=8923987297")
+    end
+
+    it "gracefully handles invalid status param" do
+      get "/api/v1/merchants/#{merchant.id}/invoices?status=invalid-status"
+
+      expect(response).to be_successful
+      expect(response.status).to eq(200)
+
+      response_data = parsed_response
+
+      expect(response_data).to have_key(:data)
+      expect(response_data[:data]).to be_an(Array)
+
+      response_invoices = response_data[:data]
+
+      expect(response_invoices.length).to eq(90)
+
+      response_invoices.each do |invoice|
+        expect(invoice).to have_key(:id)
+        expect(invoice[:id]).to be_a(String)
+
+        expect(invoice).to have_key(:type)
+        expect(invoice[:type]).to eq("invoice")
+
+        expect(invoice).to have_key(:attributes)
+        expect(invoice[:attributes]).to be_a(Hash)
+
+        attributes = invoice[:attributes]
+
+        expect(attributes).to have_key(:customer_id)
+        expect(attributes[:customer_id]).to be_an(Integer)
+
+        expect(attributes).to have_key(:merchant_id)
+        expect(attributes[:merchant_id]).to eq(merchant.id)
+
+        expect(attributes).to have_key(:status)
+        expect(attributes[:status]).to be_a(String)
+      end
     end
   end
 end
