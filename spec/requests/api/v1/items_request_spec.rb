@@ -665,6 +665,42 @@ RSpec.describe "Items API", type: :request do
           expect(response_data[:errors].first).to eq("400")
           expect(response_data[:message]).to eq("Cannot send both name and price parameters")
         end
+
+        it "gracefully handles min_price less than 0" do
+          get "/api/v1/items/find", params: {min_price: -25}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("min_price cannot be less than 0")
+        end
+
+        it "gracefully handles max_price less than 0" do
+          get "/api/v1/items/find", params: {max_price: -25}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("max_price cannot be less than 0")
+        end
+
+        it "gracefully handles min_price bigger than max_price" do
+          get "/api/v1/items/find", params: {min_price: 250, max_price: 50}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("min_price cannot be greater than max price")
+        end
       end
     end
 
