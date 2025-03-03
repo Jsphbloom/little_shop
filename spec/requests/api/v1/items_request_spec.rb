@@ -705,33 +705,337 @@ RSpec.describe "Items API", type: :request do
     end
 
     describe "GET /api/v1/items/find_all" do
-      it "returns an array of matching items using Faker values" do
-        generated_name1 = Faker::Commerce.product_name
-        generated_name2 = Faker::Commerce.product_name
-        create(:item, name: generated_name1)
-        create(:item, name: generated_name2)
-        substring = generated_name1[0, 2].downcase
-        get "/api/v1/items/find_all", params: {name: substring}
-        body = parsed_response
-        expect(body[:data]).to be_an(Array)
-        expect(body[:data].length).to be >= 1
-        body[:data].each do |it|
-          expect(it[:attributes][:name].downcase).to include(substring)
+      it "finds items using a substring of the name" do
+        create(:item, name: "Turing")
+        create(:item, name: "Ring World")
+        create(:item, name: "Something Else")
+
+        get "/api/v1/items/find_all", params: {name: "Ring"}
+
+        response_data = parsed_response
+
+        expect(response_data).to have_key(:data)
+        expect(response_data[:data]).to be_an(Array)
+
+        response_items = response_data[:data]
+
+        expect(response_items.length).to eq(2)
+
+        response_items.each do |item|
+          expect(item).to have_key(:id)
+          expect(item[:id]).to be_a(String)
+
+          expect(item).to have_key(:type)
+          expect(item[:type]).to eq("item")
+
+          expect(item).to have_key(:attributes)
+          expect(item[:attributes]).to be_a(Hash)
+
+          attributes = item[:attributes]
+
+          expect(attributes).to have_key(:name)
+          expect(attributes[:name]).to be_a(String)
+
+          expect(attributes).to have_key(:description)
+          expect(attributes[:description]).to be_a(String)
+
+          expect(attributes).to have_key(:unit_price)
+          expect(attributes[:unit_price]).to be_a(Float)
+
+          expect(attributes[:name].downcase.include?("ring")).to be true
         end
       end
 
-      it "returns an empty array for find_all with a max_price too low" do
-        create(:item, unit_price: 50.0)
-        get "/api/v1/items/find_all", params: {max_price: 10}
-        body = parsed_response
-        expect(body[:data]).to eq([])
+      it "returns items with unit_price >= min_price" do
+        create_list(:item, 25, unit_price: 60.0)
+        create_list(:item, 30, unit_price: 30.0)
+
+        get "/api/v1/items/find_all", params: {min_price: 50}
+
+        response_data = parsed_response
+
+        expect(response_data).to have_key(:data)
+        expect(response_data[:data]).to be_an(Array)
+
+        response_items = response_data[:data]
+
+        expect(response_items.length).to eq(25)
+
+        response_items.each do |item|
+          expect(item).to have_key(:id)
+          expect(item[:id]).to be_a(String)
+
+          expect(item).to have_key(:type)
+          expect(item[:type]).to eq("item")
+
+          expect(item).to have_key(:attributes)
+          expect(item[:attributes]).to be_a(Hash)
+
+          attributes = item[:attributes]
+
+          expect(attributes).to have_key(:name)
+          expect(attributes[:name]).to be_a(String)
+
+          expect(attributes).to have_key(:description)
+          expect(attributes[:description]).to be_a(String)
+
+          expect(attributes).to have_key(:unit_price)
+          expect(attributes[:unit_price]).to be_a(Float)
+
+          expect(attributes[:unit_price] >= 50).to be true
+        end
       end
 
-      it "returns an empty array for find_all when a max_price query yields no results" do
-        create(:item, unit_price: 50.0)
-        get "/api/v1/items/find_all", params: {max_price: 10}
-        body = parsed_response
-        expect(body[:data]).to eq([])
+      it "returns items with unit_price <= max_price" do
+        create_list(:item, 25, unit_price: 60.0)
+        create_list(:item, 30, unit_price: 30.0)
+
+        get "/api/v1/items/find_all", params: {max_price: 50}
+
+        response_data = parsed_response
+
+        expect(response_data).to have_key(:data)
+        expect(response_data[:data]).to be_an(Array)
+
+        response_items = response_data[:data]
+
+        expect(response_items.length).to eq(30)
+
+        response_items.each do |item|
+          expect(item).to have_key(:id)
+          expect(item[:id]).to be_a(String)
+
+          expect(item).to have_key(:type)
+          expect(item[:type]).to eq("item")
+
+          expect(item).to have_key(:attributes)
+          expect(item[:attributes]).to be_a(Hash)
+
+          attributes = item[:attributes]
+
+          expect(attributes).to have_key(:name)
+          expect(attributes[:name]).to be_a(String)
+
+          expect(attributes).to have_key(:description)
+          expect(attributes[:description]).to be_a(String)
+
+          expect(attributes).to have_key(:unit_price)
+          expect(attributes[:unit_price]).to be_a(Float)
+
+          expect(attributes[:unit_price] <= 50).to be true
+        end
+      end
+
+      it "returns the first item with unit_price between min_price and max_price" do
+        create_list(:item, 20, unit_price: 80.0)
+        create_list(:item, 25, unit_price: 60.0)
+        create_list(:item, 30, unit_price: 30.0)
+
+        get "/api/v1/items/find_all", params: {min_price: 50, max_price: 70}
+
+        response_data = parsed_response
+
+        expect(response_data).to have_key(:data)
+        expect(response_data[:data]).to be_an(Array)
+
+        response_items = response_data[:data]
+
+        expect(response_items.length).to eq(25)
+
+        response_items.each do |item|
+          expect(item).to have_key(:id)
+          expect(item[:id]).to be_a(String)
+
+          expect(item).to have_key(:type)
+          expect(item[:type]).to eq("item")
+
+          expect(item).to have_key(:attributes)
+          expect(item[:attributes]).to be_a(Hash)
+
+          attributes = item[:attributes]
+
+          expect(attributes).to have_key(:name)
+          expect(attributes[:name]).to be_a(String)
+
+          expect(attributes).to have_key(:description)
+          expect(attributes[:description]).to be_a(String)
+
+          expect(attributes).to have_key(:unit_price)
+          expect(attributes[:unit_price]).to be_a(Float)
+
+          expect(attributes[:unit_price] >= 50).to be true
+          expect(attributes[:unit_price] <= 70).to be true
+        end
+      end
+
+      describe "sad paths" do
+        it "gracefully handles no item found by name" do
+          get "/api/v1/items/find_all", params: {name: "ILI"}
+
+          expect(response).to be_successful
+          expect(response.status).to eq(200)
+
+          response_data = parsed_response
+
+          expect(response_data).to have_key(:data)
+          expect(response_data[:data]).to eq([])
+        end
+
+        it "gracefully handles no item found by min_price" do
+          get "/api/v1/items/find_all", params: {min_price: 10}
+
+          expect(response).to be_successful
+          expect(response.status).to eq(200)
+
+          response_data = parsed_response
+
+          expect(response_data).to have_key(:data)
+          expect(response_data[:data]).to eq([])
+        end
+
+        it "gracefully handles no item found by max_price" do
+          get "/api/v1/items/find_all", params: {max_price: 20}
+
+          expect(response).to be_successful
+          expect(response.status).to eq(200)
+
+          response_data = parsed_response
+
+          expect(response_data).to have_key(:data)
+          expect(response_data[:data]).to eq([])
+        end
+
+        it "gracefully handles no item found by min_price and max_price" do
+          get "/api/v1/items/find_all", params: {min_price: 10, max_price: 20}
+
+          expect(response).to be_successful
+          expect(response.status).to eq(200)
+
+          response_data = parsed_response
+
+          expect(response_data).to have_key(:data)
+          expect(response_data[:data]).to eq([])
+        end
+
+        it "gracefully handles missing parameter" do
+          get "/api/v1/items/find_all", params: {}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("param is missing or the value is empty: name")
+        end
+
+        it "gracefully handles empty name parameter" do
+          get "/api/v1/items/find_all", params: {name: ""}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("param is missing or the value is empty: name")
+        end
+
+        it "gracefully handles empty min_price parameter" do
+          get "/api/v1/items/find_all", params: {min_price: ""}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("param is missing or the value is empty: min_price")
+        end
+
+        it "gracefully handles empty max_price parameter" do
+          get "/api/v1/items/find_all", params: {max_price: ""}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("param is missing or the value is empty: max_price")
+        end
+
+        it "gracefully handles sending name and min_price" do
+          get "/api/v1/items/find_all", params: {name: "ring", min_price: 50}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("Cannot send both name and price parameters")
+        end
+
+        it "gracefully handles sending name and max_price" do
+          get "/api/v1/items/find_all", params: {name: "ring", max_price: 150}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("Cannot send both name and price parameters")
+        end
+
+        it "gracefully handles sending name, min_price and max_price" do
+          get "/api/v1/items/find_all", params: {name: "ring", min_price: 50, max_price: 250}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("Cannot send both name and price parameters")
+        end
+
+        it "gracefully handles min_price less than 0" do
+          get "/api/v1/items/find_all", params: {min_price: -25}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("min_price cannot be less than 0")
+        end
+
+        it "gracefully handles max_price less than 0" do
+          get "/api/v1/items/find_all", params: {max_price: -25}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("max_price cannot be less than 0")
+        end
+
+        it "gracefully handles min_price bigger than max_price" do
+          get "/api/v1/items/find_all", params: {min_price: 250, max_price: 50}
+
+          expect(response).not_to be_successful
+          expect(response.status).to eq(400)
+
+          response_data = parsed_response
+
+          expect(response_data[:errors].first).to eq("400")
+          expect(response_data[:message]).to eq("min_price cannot be greater than max price")
+        end
       end
     end
   end
