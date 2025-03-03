@@ -98,5 +98,15 @@ describe Item, type: :model do
         expect(Item.search_all(params)).to eq(items)
       end
     end
+
+    describe ".find_by_merchant" do
+      it "returns all items belonging to a merchant" do
+        merchant = create(:merchant)
+        items = create_list(:item, 25, merchant: merchant)
+        create_list(:item, 30)
+
+        expect(Item.find_by_merchant(merchant.id)).to eq(items)
+      end
+    end
   end
 end
