@@ -20,4 +20,16 @@ class Item < ApplicationRecord
       Item.find_by("unit_price <= ?", params[:max_price])
     end
   end
+
+  def self.search_all(params)
+    if params[:name]
+      Item.where("name ILIKE ?", "%#{params[:name]}%")
+    elsif params[:min_price] && params[:max_price]
+      Item.where("unit_price >= ? AND unit_price <= ?", params[:min_price], params[:max_price])
+    elsif params[:min_price]
+      Item.where("unit_price >= ?", params[:min_price])
+    elsif params[:max_price]
+      Item.where("unit_price <= ?", params[:max_price])
+    end
+  end
 end

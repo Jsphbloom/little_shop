@@ -47,18 +47,7 @@ class Api::V1::ItemsController < ApplicationController
 
   def find_all
     return unless valid_search_params?
-
-    # TODO: Fix MVC violation; extract to model
-    items = if params[:name].present?
-      Item.where("name ILIKE ?", "%#{params[:name]}%")
-    elsif params[:min_price].present? && params[:max_price].present?
-      Item.where("unit_price >= ? AND unit_price <= ?", params[:min_price], params[:max_price])
-    elsif params[:min_price].present?
-      Item.where("unit_price >= ?", params[:min_price])
-    elsif params[:max_price].present?
-      Item.where("unit_price <= ?", params[:max_price])
-    end
-    render json: ItemSerializer.new(items)
+    render json: ItemSerializer.new(Item.search_all(params))
   end
 
   private
