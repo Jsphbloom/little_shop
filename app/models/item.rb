@@ -32,4 +32,8 @@ class Item < ApplicationRecord
       Item.where("unit_price <= ?", params[:max_price])
     end
   end
+
+  def self.find_by_merchant(id)
+    where(merchant_id: id)
+  end
 end
