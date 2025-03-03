@@ -196,9 +196,10 @@ RSpec.describe "Merchants API", type: :request do
 
     describe "GET /api/v1/merchants/find?" do
       it "can return a single merchant by name fragment" do
-        merchant = create(:merchant, name: "Logan's Store")
-        create(:merchant, name: "Alec's Store")
-        create(:merchant, name: "Logan's Shop")
+        merchant1 = create(:merchant, name: "Logan's Store")
+        merchant2 = create(:merchant, name: "Alec's Store")
+        merchant3 = create(:merchant, name: "Logan's Shop")
+
         get "/api/v1/merchants/find?name=log"
 
         expect(response).to be_successful
@@ -209,16 +210,22 @@ RSpec.describe "Merchants API", type: :request do
         expect(response_data).to have_key(:data)
         expect(response_data[:data]).to be_a(Hash)
 
-        expect(response_data[:data]).to include(
-          id: merchant.id.to_s,
-          type: "merchant"
-        )
+        # Ensure the first merchant in alphabetical order is returned
+        expected_merchant = [merchant2, merchant3, merchant1].sort_by(&:name).first
+        expect(response_data[:data][:id].to_s.force_encoding("UTF-8")).to eq(expected_merchant.id.to_s.force_encoding("UTF-8"))
+        expect(response_data[:data][:type]).to eq("merchant")
+        expect(response_data[:data][:attributes][:name]).to eq(expected_merchant.name)
+      end
 
-        expect(response_data[:data]).to have_key(:attributes)
-        expect(response_data[:data][:attributes]).to be_a(Hash)
-        expect(response_data[:data][:attributes]).to include(
-          name: merchant.name
-        )
+      it "will gracefully handle find if the merchant name fragment is not found" do
+        get "/api/v1/merchants/find?name=nonexistent"
+
+        expect(response).to have_http_status(:not_found)
+
+        response_data = parsed_response
+
+        expect(response_data).to have_key(:errors)
+        expect(response_data[:errors]).to eq(["404"])
       end
     end
 
@@ -380,6 +387,40 @@ RSpec.describe "Merchants API", type: :request do
 
       expect(response_data[:errors].first).to eq("404")
       expect(response_data[:message]).to eq("Couldn't find Merchant with 'id'=0")
+    end
+  end
+
+  describe "GET /api/v1/merchants/sorted" do
+    it "returns merchants sorted by name in alphabetical order" do
+      merchant1 = create(:merchant, name: "Zeta Store")
+      merchant2 = create(:merchant, name: "Alpha Store")
+      merchant3 = create(:merchant, name: "Beta Store")
+
+      get "/api/v1/merchants/sorted"
+
+      expect(response).to be_successful
+      expect(response.status).to eq(200)
+
+      response_data = JSON.parse(response.body, symbolize_names: true)
+      expect(response_data).to have_key(:data)
+      expect(response_data[:data]).to be_an(Array)
+
+      response_merchants = response_data[:data]
+      expect(response_merchants.length).to eq(3)
+      expect(response_merchants[0][:attributes][:name]).to eq("Alpha Store")
+      expect(response_merchants[1][:attributes][:name]).to eq("Beta Store")
+      expect(response_merchants[2][:attributes][:name]).to eq("Zeta Store")
+    end
+
+    context "error handling" do
+      it "returns a 404 error when Merchant.order fails" do
+        allow(Merchant).to receive(:order).and_raise(ActiveRecord::RecordNotFound.new("Merchant not found"))
+        get "/api/v1/merchants/sorted"
+        expect(response).not_to be_successful
+        expect(response.status).to eq(404)
+        body = JSON.parse(response.body, symbolize_names: true)
+        expect(body[:errors].first).to eq("404")
+      end
     end
   end
 
