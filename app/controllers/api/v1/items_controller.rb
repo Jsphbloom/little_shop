@@ -48,8 +48,12 @@ class Api::V1::ItemsController < ApplicationController
     elsif params[:max_price].present?
       Item.find_by("unit_price <= ?", params[:max_price])
     end
-    render json: {data: {}} and return unless item
-    render json: ItemSerializer.new(item)
+
+    if item
+      render json: ItemSerializer.new(item)
+    else
+      render json: {data: {}}
+    end
   end
 
   def find_all

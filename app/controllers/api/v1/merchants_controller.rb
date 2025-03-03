@@ -41,8 +41,11 @@ class Api::V1::MerchantsController < ApplicationController
   def find
     raise ActionController::ParameterMissing.new("name") unless params[:name].present? && !params[:name].blank?
     merchant = Merchant.find_by_name_fragment(params[:name])
-    render json: {data: {}} and return unless merchant
-    render json: MerchantSerializer.new(merchant)
+    if merchant
+      render json: MerchantSerializer.new(merchant)
+    else
+      render json: {data: {}}
+    end
   end
 
   def find_all
