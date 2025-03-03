@@ -55,8 +55,7 @@ class Api::V1::MerchantsController < ApplicationController
   end
 
   def sorted
-    merchants = Merchant.order(:name)
-    render json: MerchantSerializer.new(merchants)
+    render json: MerchantSerializer.new(Merchant.sorted)
   end
 
   private

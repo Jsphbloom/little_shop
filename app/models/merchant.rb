@@ -28,4 +28,8 @@ class Merchant < ApplicationRecord
       .group("merchants.id, merchants.name")
       .order("merchants.id")
   end
+
+  def self.sorted
+    order(:name)
+  end
 end
