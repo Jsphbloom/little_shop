@@ -500,11 +500,11 @@ RSpec.describe "Items API", type: :request do
       end
 
       it "returns the first item with unit_price between min_price and max_price" do
-        item = create(:item, unit_price: 20.0)
-        create(:item, unit_price: 40.0)
+        item = create(:item, unit_price: 40.0)
+        create(:item, unit_price: 20.0)
         create(:item, unit_price: 60.0)
 
-        get "/api/v1/items/find", params: {min_price: 10, max_price: 30}
+        get "/api/v1/items/find", params: {min_price: 30, max_price: 50}
 
         response_data = parsed_response
 
