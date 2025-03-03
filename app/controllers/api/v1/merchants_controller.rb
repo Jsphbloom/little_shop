@@ -54,6 +54,11 @@ class Api::V1::MerchantsController < ApplicationController
     render json: MerchantSerializer.new(merchants)
   end
 
+  def sorted
+    merchants = Merchant.order(:name)
+    render json: MerchantSerializer.new(merchants)
+  end
+
   private
 
   def merchant_params

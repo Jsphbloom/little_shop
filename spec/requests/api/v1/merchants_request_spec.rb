@@ -343,6 +343,40 @@ RSpec.describe "Merchants API", type: :request do
     end
   end
 
+  describe "GET /api/v1/merchants/sorted" do
+    it "returns merchants sorted by name in alphabetical order" do
+      merchant1 = create(:merchant, name: "Zeta Store")
+      merchant2 = create(:merchant, name: "Alpha Store")
+      merchant3 = create(:merchant, name: "Beta Store")
+
+      get "/api/v1/merchants/sorted"
+
+      expect(response).to be_successful
+      expect(response.status).to eq(200)
+
+      response_data = JSON.parse(response.body, symbolize_names: true)
+      expect(response_data).to have_key(:data)
+      expect(response_data[:data]).to be_an(Array)
+
+      response_merchants = response_data[:data]
+      expect(response_merchants.length).to eq(3)
+      expect(response_merchants[0][:attributes][:name]).to eq("Alpha Store")
+      expect(response_merchants[1][:attributes][:name]).to eq("Beta Store")
+      expect(response_merchants[2][:attributes][:name]).to eq("Zeta Store")
+    end
+
+    context "error handling" do
+      it "returns a 404 error when Merchant.order fails" do
+        allow(Merchant).to receive(:order).and_raise(ActiveRecord::RecordNotFound.new("Merchant not found"))
+        get "/api/v1/merchants/sorted"
+        expect(response).not_to be_successful
+        expect(response.status).to eq(404)
+        body = JSON.parse(response.body, symbolize_names: true)
+        expect(body[:errors].first).to eq("404")
+      end
+    end
+  end
+
   describe "non-RESTful endpoints" do
     describe "GET /api/v1/merchants/find" do
       it "finds the merchant using a substring of the name" do
