@@ -28,16 +28,27 @@ describe Merchant, type: :model do
       end
     end
 
-    describe ".find_by_name_fragment" do
+    describe ".search" do
       it "finds a single merchant by a name fragment" do
         merchant1 = create(:merchant, name: "Logan's Store")
         merchant2 = create(:merchant, name: "Alec's Store")
         create(:merchant, name: "Logan's Shop")
         create(:merchant, name: "Alec's Shop")
-        create(:merchant, name: "Dummy Merchant 1")
+        create(:merchant)
 
-        expect(Merchant.find_by_name_fragment("Logan")).to eq(merchant1)
-        expect(Merchant.find_by_name_fragment("Alec")).to eq(merchant2)
+        expect(Merchant.search("Logan")).to eq(merchant1)
+        expect(Merchant.search("Alec")).to eq(merchant2)
+      end
+    end
+
+    describe ".search_all" do
+      it "finds a single merchant by a name fragment" do
+        merchants1 = create_list(:merchant, 25, name: "Logan's Store")
+        merchants2 = create_list(:merchant, 20, name: "Alec's Store")
+        create_list(:merchant, 30)
+
+        expect(Merchant.search_all("Logan")).to eq(merchants1)
+        expect(Merchant.search_all("Alec")).to eq(merchants2)
       end
     end
 
