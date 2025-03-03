@@ -5,7 +5,7 @@ class Api::V1::Merchant::InvoicesController < ApplicationController
     invoices = merchant.invoices
     if params[:status].present? &&
         ["shipped", "returned", "packaged"].include?(params[:status])
-      invoices = Invoice.filter_by_status(params[:status])
+      invoices = invoices.filter_by_status(params[:status])
     end
     render json: InvoiceSerializer.new(invoices)
   end
