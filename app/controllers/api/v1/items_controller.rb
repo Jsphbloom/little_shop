@@ -1,5 +1,5 @@
 class Api::V1::ItemsController < ApplicationController
-  rescue_from ActionController::ParameterMissing, with: :unprocessable_entity_response
+  rescue_from ActionController::ParameterMissing, with: :bad_request_response
   rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
 
   def index
@@ -33,33 +33,21 @@ class Api::V1::ItemsController < ApplicationController
 
   def destroy
     Item.find(params[:id]).destroy
-    head :no_content
   end
 
   def find
-    if invalid_find_params?
-      render json: {error: "Cannot send both name and price parameters"}, status: :bad_request and return
-    elsif params[:name].blank? && params[:min_price].blank? && params[:max_price].blank?
-      render json: {error: "Parameter cannot be missing or empty"}, status: :bad_request and return
-    end
-
-    item = find_item
+    return unless valid_search_params?
+    item = Item.search(params)
     if item
       render json: ItemSerializer.new(item)
     else
-      render json: {error: "Item not found"}, status: :not_found
+      render json: {data: {}}
     end
   end
 
   def find_all
-    if invalid_find_params?
-      render json: {error: "Cannot send both name and price parameters"}, status: :bad_request and return
-    elsif params[:name].blank? && params[:min_price].blank? && params[:max_price].blank?
-      render json: {error: "Parameter cannot be missing or empty"}, status: :bad_request and return
-    end
-
-    items = find_items
-    render json: ItemSerializer.new(items)
+    return unless valid_search_params?
+    render json: ItemSerializer.new(Item.search_all(params))
   end
 
   private
@@ -68,43 +56,39 @@ class Api::V1::ItemsController < ApplicationController
     params.require(:item).permit(:name, :description, :unit_price, :merchant_id)
   end
 
-  def unprocessable_entity_response(e)
-    render json: ErrorSerializer.format_error(e, "422"), status: :unprocessable_entity
+  def valid_search_params?
+    raise ActionController::ParameterMissing.new("name") unless params[:name] || params[:min_price] || params[:max_price]
+
+    if params[:name].present? &&
+        (params[:min_price].present? || params[:max_price].present?)
+      render json: {message: "Cannot send both name and price parameters", errors: ["400"]}, status: :bad_request
+      return false
+    end
+
+    [:name, :min_price, :max_price].each do |p|
+      raise ActionController::ParameterMissing.new(p) if !params[p].nil? && params[p].blank?
+    end
+
+    [:min_price, :max_price].each do |p|
+      if params[p] && params[p].to_f < 0
+        render json: {message: "#{p} cannot be less than 0", errors: ["400"]}, status: :bad_request
+        return false
+      end
+    end
+
+    if params[:min_price] && params[:max_price] && params[:min_price].to_f > params[:max_price].to_f
+      render json: {message: "min_price cannot be greater than max price", errors: ["400"]}, status: :bad_request
+      return false
+    end
+
+    true
+  end
+
+  def bad_request_response(e)
+    render json: ErrorSerializer.format_error(e, "400"), status: :bad_request
   end
 
   def not_found_response(e)
     render json: ErrorSerializer.format_error(e, "404"), status: :not_found
-  end
-
-  def invalid_find_params?
-    params[:name].present? && (params[:min_price].present? || params[:max_price].present?)
-  end
-
-  def find_item
-    if params[:name].present?
-      Item.where("name ILIKE ?", "%#{params[:name]}%").order(:name).first
-    elsif params[:min_price].present? && params[:max_price].present?
-      Item.where("unit_price >= ? AND unit_price <= ?", params[:min_price], params[:max_price]).order(:unit_price).first
-    elsif params[:min_price].present?
-      Item.where("unit_price >= ?", params[:min_price]).order(:unit_price).first
-    elsif params[:max_price].present?
-      Item.where("unit_price <= ?", params[:max_price]).order(:unit_price).first
-    else
-      nil
-    end
-  end
-
-  def find_items
-    if params[:name].present?
-      Item.where("name ILIKE ?", "%#{params[:name]}%").order(:name)
-    elsif params[:min_price].present? && params[:max_price].present?
-      Item.where("unit_price >= ? AND unit_price <= ?", params[:min_price], params[:max_price]).order(:unit_price)
-    elsif params[:min_price].present?
-      Item.where("unit_price >= ?", params[:min_price]).order(:unit_price)
-    elsif params[:max_price].present?
-      Item.where("unit_price <= ?", params[:max_price]).order(:unit_price)
-    else
-      []
-    end
   end
 end

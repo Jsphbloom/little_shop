@@ -8,4 +8,32 @@ class Item < ApplicationRecord
   def self.sort_by_price
     order(unit_price: :asc)
   end
+
+  def self.search(params)
+    if params[:name]
+      Item.find_by("name ILIKE ?", "%#{params[:name]}%")
+    elsif params[:min_price] && params[:max_price]
+      Item.find_by("unit_price >= ? AND unit_price <= ?", params[:min_price], params[:max_price])
+    elsif params[:min_price]
+      Item.find_by("unit_price >= ?", params[:min_price])
+    elsif params[:max_price]
+      Item.find_by("unit_price <= ?", params[:max_price])
+    end
+  end
+
+  def self.search_all(params)
+    if params[:name]
+      Item.where("name ILIKE ?", "%#{params[:name]}%")
+    elsif params[:min_price] && params[:max_price]
+      Item.where("unit_price >= ? AND unit_price <= ?", params[:min_price], params[:max_price])
+    elsif params[:min_price]
+      Item.where("unit_price >= ?", params[:min_price])
+    elsif params[:max_price]
+      Item.where("unit_price <= ?", params[:max_price])
+    end
+  end
+
+  def self.find_by_merchant(id)
+    where(merchant_id: id)
+  end
 end
