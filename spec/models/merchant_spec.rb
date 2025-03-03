@@ -59,5 +59,15 @@ describe Merchant, type: :model do
         expect(Merchant.with_item_count[0].item_count).to eq(30)
       end
     end
+
+    describe ".sorted" do
+      it "sorts merchants by name" do
+        merchant1 = create(:merchant, name: "Zeta Store")
+        merchant2 = create(:merchant, name: "Alpha Store")
+        merchant3 = create(:merchant, name: "Beta Store")
+
+        expect(Merchant.sorted).to eq([merchant2, merchant3, merchant1])
+      end
+    end
   end
 end
