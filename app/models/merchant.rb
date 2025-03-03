@@ -14,8 +14,12 @@ class Merchant < ApplicationRecord
       .distinct
   end
 
-  def self.find_by_name_fragment(fragment)
+  def self.search(fragment)
     find_by("name ILIKE ?", "%#{fragment}%")
+  end
+
+  def self.search_all(fragment)
+    where("name ILIKE ?", "%#{fragment}%")
   end
 
   def self.with_item_count

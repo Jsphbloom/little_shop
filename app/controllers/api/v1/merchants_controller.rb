@@ -40,7 +40,7 @@ class Api::V1::MerchantsController < ApplicationController
 
   def find
     raise ActionController::ParameterMissing.new("name") unless params[:name].present? && !params[:name].blank?
-    merchant = Merchant.find_by_name_fragment(params[:name])
+    merchant = Merchant.search(params[:name])
     if merchant
       render json: MerchantSerializer.new(merchant)
     else
@@ -50,7 +50,7 @@ class Api::V1::MerchantsController < ApplicationController
 
   def find_all
     raise ActionController::ParameterMissing.new("name") unless params[:name].present? && !params[:name].blank?
-    merchants = Merchant.where("name ILIKE ?", "%#{params[:name]}%")
+    merchants = Merchant.search_all(params[:name])
     render json: MerchantSerializer.new(merchants)
   end
 
