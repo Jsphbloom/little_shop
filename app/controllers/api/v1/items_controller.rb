@@ -36,30 +36,9 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def find
-    raise ActionController::ParameterMissing.new("name") unless params[:name] || params[:min_price] || params[:max_price]
+    return unless valid_search_params?
 
-    if params[:name].present? &&
-        (params[:min_price].present? || params[:max_price].present?)
-      render json: {message: "Cannot send both name and price parameters", errors: ["400"]}, status: :bad_request
-      return
-    end
-
-    [:name, :min_price, :max_price].each do |p|
-      raise ActionController::ParameterMissing.new(p) if !params[p].nil? && params[p].blank?
-    end
-
-    [:min_price, :max_price].each do |p|
-      if params[p] && params[p].to_f < 0
-        render json: {message: "#{p} cannot be less than 0", errors: ["400"]}, status: :bad_request
-        return
-      end
-    end
-
-    if params[:min_price] && params[:max_price] && params[:min_price].to_f > params[:max_price].to_f
-      render json: {message: "min_price cannot be greater than max price", errors: ["400"]}, status: :bad_request
-      return
-    end
-
+    # TODO: Fix MVC violation; extract to model
     item = if params[:name].present?
       Item.find_by("name ILIKE ?", "%#{params[:name]}%")
     elsif params[:min_price].present? && params[:max_price].present?
@@ -74,28 +53,9 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def find_all
-    if params[:name].present? &&
-        (params[:min_price].present? || params[:max_price].present?)
-      render json: {message: "Cannot send both name and price parameters", errors: ["400"]}, status: :bad_request
-      return
-    end
+    return unless valid_search_params?
 
-    [:name, :min_price, :max_price].each do |p|
-      raise ActionController::ParameterMissing.new(p) if !params[p].nil? && params[p].blank?
-    end
-
-    [:min_price, :max_price].each do |p|
-      if params[p] && params[p].to_f < 0
-        render json: {message: "#{p} cannot be less than 0", errors: ["400"]}, status: :bad_request
-        return
-      end
-    end
-
-    if params[:min_price] && params[:max_price] && params[:min_price].to_f > params[:max_price].to_f
-      render json: {message: "min_price cannot be greater than max price", errors: ["400"]}, status: :bad_request
-      return
-    end
-
+    # TODO: Fix MVC violation; extract to model
     items = if params[:name].present?
       Item.where("name ILIKE ?", "%#{params[:name]}%")
     elsif params[:min_price].present? && params[:max_price].present?
@@ -112,6 +72,34 @@ class Api::V1::ItemsController < ApplicationController
 
   def item_params
     params.require(:item).permit(:name, :description, :unit_price, :merchant_id)
+  end
+
+  def valid_search_params?
+    raise ActionController::ParameterMissing.new("name") unless params[:name] || params[:min_price] || params[:max_price]
+
+    if params[:name].present? &&
+        (params[:min_price].present? || params[:max_price].present?)
+      render json: {message: "Cannot send both name and price parameters", errors: ["400"]}, status: :bad_request
+      return false
+    end
+
+    [:name, :min_price, :max_price].each do |p|
+      raise ActionController::ParameterMissing.new(p) if !params[p].nil? && params[p].blank?
+    end
+
+    [:min_price, :max_price].each do |p|
+      if params[p] && params[p].to_f < 0
+        render json: {message: "#{p} cannot be less than 0", errors: ["400"]}, status: :bad_request
+        return false
+      end
+    end
+
+    if params[:min_price] && params[:max_price] && params[:min_price].to_f > params[:max_price].to_f
+      render json: {message: "min_price cannot be greater than max price", errors: ["400"]}, status: :bad_request
+      return false
+    end
+
+    true
   end
 
   def bad_request_response(e)
