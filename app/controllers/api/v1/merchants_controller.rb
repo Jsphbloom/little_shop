@@ -1,5 +1,5 @@
 class Api::V1::MerchantsController < ApplicationController
-  rescue_from ActionController::ParameterMissing, with: :unprocessable_entity_response
+  rescue_from ActionController::ParameterMissing, with: :bad_request_response
   rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
 
   def index
@@ -20,13 +20,7 @@ class Api::V1::MerchantsController < ApplicationController
   end
 
   def show
-    if params[:name].present?
-      merchant = Merchant.find_by_name_fragment(params[:name])
-      raise ActiveRecord::RecordNotFound.new("Merchant not found") unless merchant
-    else
-      merchant = Merchant.find(params[:id])
-    end
-    render json: MerchantSerializer.new(merchant)
+    render json: MerchantSerializer.new(Merchant.find(params[:id]))
   end
 
   def create
@@ -45,28 +39,23 @@ class Api::V1::MerchantsController < ApplicationController
   end
 
   def find
-    if params[:name].blank?
-      render json: {error: "Parameter cannot be missing or empty"}, status: :bad_request and return
-    end
-    merchant = Merchant.where("name ILIKE ?", "%#{params[:name]}%").order(:name).first
+    raise ActionController::ParameterMissing.new("name") unless params[:name].present? && !params[:name].blank?
+    merchant = Merchant.search(params[:name])
     if merchant
       render json: MerchantSerializer.new(merchant)
     else
-      render json: {error: "Merchant not found"}, status: :not_found
+      render json: {data: {}}
     end
   end
 
   def find_all
-    if params[:name].blank?
-      render json: {error: "Parameter cannot be missing or empty"}, status: :bad_request and return
-    end
-    merchants = Merchant.where("name ILIKE ?", "%#{params[:name]}%").order(:name)
+    raise ActionController::ParameterMissing.new("name") unless params[:name].present? && !params[:name].blank?
+    merchants = Merchant.search_all(params[:name])
     render json: MerchantSerializer.new(merchants)
   end
 
   def sorted
-    merchants = Merchant.order(:name)
-    render json: MerchantSerializer.new(merchants)
+    render json: MerchantSerializer.new(Merchant.sorted)
   end
 
   private
@@ -75,8 +64,8 @@ class Api::V1::MerchantsController < ApplicationController
     params.require(:merchant).permit(:name)
   end
 
-  def unprocessable_entity_response(e)
-    render json: ErrorSerializer.format_error(e, "422"), status: :unprocessable_entity
+  def bad_request_response(e)
+    render json: ErrorSerializer.format_error(e, "400"), status: :bad_request
   end
 
   def not_found_response(e)

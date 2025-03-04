@@ -20,5 +20,93 @@ describe Item, type: :model do
         expect(sorted_prices).to eq([2, 4, 7, 10, 100])
       end
     end
+
+    describe ".search" do
+      it "can find item by name" do
+        item = create(:item, name: "Something")
+        create(:item, name: "Nothing")
+
+        params = {name: "some"}
+
+        expect(Item.search(params)).to eq(item)
+      end
+
+      it "can find item by min_price" do
+        item = create(:item, unit_price: 15.0)
+        create(:item, unit_price: 9.0)
+
+        params = {min_price: 10}
+
+        expect(Item.search(params)).to eq(item)
+      end
+
+      it "can find item by max_price" do
+        item = create(:item, unit_price: 9.0)
+        create(:item, unit_price: 15.0)
+
+        params = {max_price: 10}
+
+        expect(Item.search(params)).to eq(item)
+      end
+
+      it "can find item by min_price and max_price" do
+        item = create(:item, unit_price: 9.0)
+        create(:item, unit_price: 15.0)
+        create(:item, unit_price: 4.0)
+
+        params = {min_price: 5, max_price: 10}
+
+        expect(Item.search(params)).to eq(item)
+      end
+    end
+
+    describe ".search_all" do
+      it "can find item by name" do
+        items = create_list(:item, 25, name: "Something")
+        create_list(:item, 20, name: "Nothing")
+
+        params = {name: "some"}
+
+        expect(Item.search_all(params)).to eq(items)
+      end
+
+      it "can find item by min_price" do
+        items = create_list(:item, 25, unit_price: 15.0)
+        create_list(:item, 20, unit_price: 9.0)
+
+        params = {min_price: 10}
+
+        expect(Item.search_all(params)).to eq(items)
+      end
+
+      it "can find item by max_price" do
+        items = create_list(:item, 25, unit_price: 9.0)
+        create_list(:item, 20, unit_price: 15.0)
+
+        params = {max_price: 10}
+
+        expect(Item.search_all(params)).to eq(items)
+      end
+
+      it "can find item by min_price and max_price" do
+        items = create_list(:item, 25, unit_price: 9.0)
+        create_list(:item, 20, unit_price: 15.0)
+        create_list(:item, 30, unit_price: 4.0)
+
+        params = {min_price: 5, max_price: 10}
+
+        expect(Item.search_all(params)).to eq(items)
+      end
+    end
+
+    describe ".find_by_merchant" do
+      it "returns all items belonging to a merchant" do
+        merchant = create(:merchant)
+        items = create_list(:item, 25, merchant: merchant)
+        create_list(:item, 30)
+
+        expect(Item.find_by_merchant(merchant.id)).to eq(items)
+      end
+    end
   end
 end

@@ -28,16 +28,27 @@ describe Merchant, type: :model do
       end
     end
 
-    describe ".find_by_name_fragment" do
+    describe ".search" do
       it "finds a single merchant by a name fragment" do
         merchant1 = create(:merchant, name: "Logan's Store")
         merchant2 = create(:merchant, name: "Alec's Store")
         create(:merchant, name: "Logan's Shop")
         create(:merchant, name: "Alec's Shop")
-        create(:merchant, name: "Dummy Merchant 1")
+        create(:merchant)
 
-        expect(Merchant.find_by_name_fragment("Logan")).to eq(merchant1)
-        expect(Merchant.find_by_name_fragment("Alec")).to eq(merchant2)
+        expect(Merchant.search("Logan")).to eq(merchant1)
+        expect(Merchant.search("Alec")).to eq(merchant2)
+      end
+    end
+
+    describe ".search_all" do
+      it "finds a single merchant by a name fragment" do
+        merchants1 = create_list(:merchant, 25, name: "Logan's Store")
+        merchants2 = create_list(:merchant, 20, name: "Alec's Store")
+        create_list(:merchant, 30)
+
+        expect(Merchant.search_all("Logan")).to eq(merchants1)
+        expect(Merchant.search_all("Alec")).to eq(merchants2)
       end
     end
 
@@ -46,6 +57,16 @@ describe Merchant, type: :model do
         create_list(:item, 30, merchant: create(:merchant))
 
         expect(Merchant.with_item_count[0].item_count).to eq(30)
+      end
+    end
+
+    describe ".sorted" do
+      it "sorts merchants by name" do
+        merchant1 = create(:merchant, name: "Zeta Store")
+        merchant2 = create(:merchant, name: "Alpha Store")
+        merchant3 = create(:merchant, name: "Beta Store")
+
+        expect(Merchant.sorted).to eq([merchant2, merchant3, merchant1])
       end
     end
   end
