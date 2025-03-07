@@ -25,6 +25,18 @@ RSpec.describe "Coupons API", type: :request do
         response_coupons = response_data[:data]
 
         expect(response_coupons.length).to eq(20)
+
+        response_coupons.each do |coupon|
+          expect(coupon).to have_key(:id)
+          expect(coupon[:id]).to be_a(String)
+
+          expect(coupon).to have_key(:type)
+
+          expect(coupon[:type]).to eq("coupon")
+
+          expect(coupon).to have_key(:attributes)
+          expect(coupon[:attributes]).to be_a(Hash)
+        end
       end
     end
   end
