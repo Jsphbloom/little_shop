@@ -17,9 +17,12 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_07_000600) do
   create_table "coupons", force: :cascade do |t|
     t.string "name"
     t.string "code"
-    t.string "discount"
+    t.string "discount_type"
+    t.float "discount_value"
+    t.bigint "merchant_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["merchant_id"], name: "index_coupons_on_merchant_id"
   end
 
   create_table "customers", force: :cascade do |t|
@@ -46,6 +49,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_07_000600) do
     t.string "status"
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
+    t.bigint "coupon_id"
+    t.index ["coupon_id"], name: "index_invoices_on_coupon_id"
     t.index ["customer_id"], name: "index_invoices_on_customer_id"
     t.index ["merchant_id"], name: "index_invoices_on_merchant_id"
   end
@@ -76,8 +81,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_07_000600) do
     t.index ["invoice_id"], name: "index_transactions_on_invoice_id"
   end
 
+  add_foreign_key "coupons", "merchants"
   add_foreign_key "invoice_items", "invoices"
   add_foreign_key "invoice_items", "items"
+  add_foreign_key "invoices", "coupons"
   add_foreign_key "invoices", "customers"
   add_foreign_key "invoices", "merchants"
   add_foreign_key "items", "merchants"
