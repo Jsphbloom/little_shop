@@ -40,5 +40,7 @@ FactoryBot.define do
     code { Faker::Commerce.promotion_code(digits: 2) }
     discount_type { ["Percent", "Dollar off"].sample }
     discount_value { Faker::Number.within(range: 1..100) }
+    merchant
+    active { [true, false].sample }
   end
 end
