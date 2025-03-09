@@ -40,6 +40,41 @@ RSpec.describe "Coupons API", type: :request do
       end
     end
 
+    describe "GET /api/v1/coupons/:id" do
+      it "can return a single coupon" do
+        merchants = create_list(:merchant, 5)
+
+        merchants.each do |merchant|
+          create(:coupon, merchant: merchant)
+        end
+
+        coupon = Coupon.first
+
+        get "/api/v1/coupons/#{coupon.id}"
+        expect(response).to be_successful
+        expect(response.status).to eq(200)
+
+        response_data = parsed_response
+
+        expect(response_data).to have_key(:data)
+
+        response_coupons = response_data[:data]
+
+        # binding.pry
+        expect(response_data.length).to eq(1)
+        expect(response_coupons.length).to eq(3)
+        expect(response_coupons).to have_key(:id)
+        expect(response_coupons).to have_key(:type)
+        expect(response_coupons).to have_key(:attributes)
+        expect(response_coupons[:id]).to be_a(String)
+
+
+        expect(response_coupons[:type]).to eq("coupon")
+
+        expect(response_coupons[:attributes]).to be_a(Hash)
+      end
+    end
+
     describe "POST /api/v1/coupons" do
       it "can create a coupon" do
         merchant = create(:merchant)
@@ -93,4 +128,18 @@ RSpec.describe "Coupons API", type: :request do
       end
     end
   end
+
+   describe "sad paths" do
+      it "will gracefully handle get with a nonexistent coupon id" do
+        get "/api/v1/coupons/0"
+
+        expect(response).not_to be_successful
+        expect(response.status).to eq(404)
+
+        response_data = parsed_response
+
+        expect(response_data[:errors]).to eq(["404"])
+        expect(response_data[:message]).to eq("Couldn't find Coupon with 'id'=0")
+      end
+    end
 end
