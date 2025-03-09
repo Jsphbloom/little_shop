@@ -71,21 +71,14 @@ RSpec.describe "Coupons API", type: :request do
     describe "PATCH /api/v1/coupons/:id" do
       it "can update an existing coupon" do
         merchant = create(:merchant)
-        coupon = create(:coupon, merchant: merchant)
+        coupon = create(:coupon, merchant: merchant, active: true)
 
-        new_name = Faker::Commerce.vendor until new_name != coupon.name && new_name
-
-        coupon_params = {name: new_name}
-        headers = {"CONTENT_TYPE" => "application/json"}
-
-        patch "/api/v1/coupons/#{coupon.id}", headers: headers, params: JSON.generate(coupon: coupon_params)
+        patch "/api/v1/coupons/#{coupon.id}"
 
         expect(response).to be_successful
         expect(response.status).to eq(200)
 
         coupon = Coupon.find(coupon.id)
-
-        expect(coupon).to have_attributes(coupon_params)
 
         response_data = parsed_response
 
@@ -96,8 +89,7 @@ RSpec.describe "Coupons API", type: :request do
 
         expect(response_data[:data]).to have_key(:attributes)
         expect(response_data[:data][:attributes]).to be_a(Hash)
-        expect(response_data[:data][:attributes]).to include(coupon_params)
-        expect(coupon.name).to eq(new_name)
+        expect(response_data[:data][:attributes][:active]).to eq(false)
       end
     end
   end
