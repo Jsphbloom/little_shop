@@ -7,7 +7,26 @@ class Api::V1::CouponsController < ApplicationController
     render json: CouponSerializer.new(coupon_list)
   end
 
+  def show
+    render json: CouponSerializer.new(Coupon.find(params[:id]))
+  end
+
+  def create
+    coupon = Coupon.create(coupon_params)
+    render json: CouponSerializer.new(coupon)
+  end
+
+  def update
+    coupon = Coupon.find(params[:id])
+    coupon.update(coupon_params)
+    render json: CouponSerializer.new(coupon)
+  end
+
   private
+
+  def coupon_params
+    params.require(:coupon).permit(:name, :code, :discount_type, :discount_value, :merchant_id, :active)
+  end
 
   def bad_request_response(e)
     render json: ErrorSerializer.format_error(e, "400"), status: :bad_request

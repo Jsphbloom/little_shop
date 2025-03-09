@@ -32,4 +32,7 @@ Rails.application.routes.draw do
   get "/api/v1/merchants/:merchant_id/invoices", to: "api/v1/merchant/invoices#index"
 
   get "/api/v1/coupons", to: "api/v1/coupons#index"
+  get "/api/v1/coupons/:id", to: "api/v1/coupons#show"
+  post "/api/v1/coupons", to: "api/v1/coupons#create"
+  patch "/api/v1/coupons/:id", to: "api/v1/coupons#update"
 end

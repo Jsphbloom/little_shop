@@ -25,3 +25,12 @@ cmd = "pg_restore --verbose --clean --no-acl --no-owner -h localhost -U $(whoami
 puts "Loading PostgreSQL Data dump into local database with command:"
 puts cmd
 system(cmd)
+
+# merchant1 = Merchant.find_or_create_by!(name: "Super Deals Store")
+# merchant2 = Merchant.find_or_create_by!(name: "Budget Goods")
+
+# merchant1.coupons.find_or_create_by!(name: "Half Off", code: "HALF50", discount_type: "Percent", discount_value: 50)
+# merchant1.coupons.find_or_create_by!(name: "BOGO", code: "BOGOFREE", discount_type: "Dollar off", discount_value: 0)
+
+# merchant2.coupons.find_or_create_by!(name: "10 Bucks Off", code: "SAVE10", discount_type: "Dollar off", discount_value: 10)
+# merchant2.coupons.find_or_create_by!(name: "Spring Sale", code: "SPRING15", discount_type: "Percent", discount_value: 15)
