@@ -1,7 +1,6 @@
 class Api::V1::CouponsController < ApplicationController
   rescue_from ActionController::ParameterMissing, with: :bad_request_response
   rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
-
   def index
     coupon_list = Coupon.all
     render json: CouponSerializer.new(coupon_list)
@@ -18,7 +17,7 @@ class Api::V1::CouponsController < ApplicationController
 
   def update
     coupon = Coupon.find(params[:id])
-    coupon.update(coupon_params)
+    coupon.update!(active: !coupon.active)
     render json: CouponSerializer.new(coupon)
   end
 
