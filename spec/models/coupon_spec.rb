@@ -30,4 +30,13 @@ describe Coupon, type: :model do
       end
     end
   end
+
+  describe 'sad paths' do
+    it 'returns an error when adding over 5 active coupons to one merchant' do
+      merchant = create(:merchant)
+      create_list(:coupon, 5, active: true, merchant: merchant)
+      expect { create(:coupon, active: true, merchant: merchant) }.to raise_error(ActiveRecord::RecordInvalid)
+      expect { create(:coupon, active: false, merchant: merchant) }.not_to raise_error
+    end
+  end
 end
