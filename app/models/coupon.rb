@@ -17,6 +17,7 @@ end
 private
 
 def active_coupon_limit
+  return unless merchant
   if active && merchant.coupons.where(active: true).count >= 5
     errors.add(:base, "A merchant can only have up to 5 active coupons.")
   end
