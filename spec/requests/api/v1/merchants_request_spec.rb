@@ -75,9 +75,9 @@ RSpec.describe "Merchants API", type: :request do
           expect(attributes).to have_key(:name)
           expect(attributes[:name]).to be_a(String)
         end
-        expect(response_merchants[0][:attributes][:name]).to eq(merchant3.name)
+        expect(response_merchants[0][:attributes][:name]).to eq(merchant1.name)
         expect(response_merchants[1][:attributes][:name]).to eq(merchant2.name)
-        expect(response_merchants[2][:attributes][:name]).to eq(merchant1.name)
+        expect(response_merchants[2][:attributes][:name]).to eq(merchant3.name)
       end
 
       it "successfully get merchants with invoice status of returned" do
