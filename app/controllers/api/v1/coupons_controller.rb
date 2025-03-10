@@ -3,15 +3,6 @@ class Api::V1::CouponsController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
   def index
     coupon_list = Coupon.all
-
-    if params[:status].present? && params[:status] == "active"
-      coupon_list = Coupon.active_true
-    end
-
-    if params[:status].present? && params[:status] == "inactive"
-      coupon_list = Coupon.active_false
-    end
-
     render json: CouponSerializer.new(coupon_list)
   end
 
