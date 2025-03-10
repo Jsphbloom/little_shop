@@ -38,5 +38,12 @@ describe Coupon, type: :model do
       expect { create(:coupon, active: true, merchant: merchant) }.to raise_error(ActiveRecord::RecordInvalid)
       expect { create(:coupon, active: false, merchant: merchant) }.not_to raise_error
     end
+
+    it 'returns an error when adding a duplicate coupon name' do
+      merchant = create(:merchant)
+      coup1 = create(:coupon, name: "TEST DEAL", merchant: merchant)
+      expect { create(:coupon, name: "TEST DEAL", merchant: merchant) }.to raise_error(ActiveRecord::RecordInvalid)
+      expect { create(:coupon, name: "TEST DEAL 2", merchant: merchant) }.not_to raise_error
+    end
   end
 end
