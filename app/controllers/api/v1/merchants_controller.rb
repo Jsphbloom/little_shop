@@ -3,7 +3,7 @@ class Api::V1::MerchantsController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
 
   def index
-    merchant_list = Merchant.all
+    merchant_list = Merchant.with_coupons_count
 
     if params[:status].present? && params[:status] == "returned"
       merchant_list = Merchant.with_returned_items
