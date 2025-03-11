@@ -1,3 +1,4 @@
+
 class Api::V1::Merchant::CouponsController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
   def index
