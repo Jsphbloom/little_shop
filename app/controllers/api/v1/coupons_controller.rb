@@ -1,6 +1,7 @@
 class Api::V1::CouponsController < ApplicationController
   rescue_from ActionController::ParameterMissing, with: :bad_request_response
   rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
+  # rescue_from ActiveRecord::RecordInvalid, with: :unprocessable_entity_response
   def index
     coupon_list = Coupon.all
 
@@ -21,11 +22,19 @@ class Api::V1::CouponsController < ApplicationController
 
   def create
     coupon = Coupon.create(coupon_params)
+
     if params[:invoice_id].present?
       invoice = Invoice.find_by(id: params[:invoice_id])
-      invoice.update!(coupon: coupon) if invoice
     end
-    render json: CouponSerializer.new(coupon)
+
+    if invoice.nil?
+      return render json: ErrorSerializer.format_error("Invoice not found.", "404"), status: :not_found
+    end
+    coupon.invoice = invoice
+
+    if coupon.save!
+      render json: CouponSerializer.new(coupon)
+    end
   end
 
   def update

@@ -34,16 +34,16 @@ describe Coupon, type: :model do
   describe 'sad paths' do
     it 'returns an error when adding over 5 active coupons to one merchant' do
       merchant = create(:merchant)
-      create_list(:coupon, 5, active: true, merchant: merchant)
+      create_list(:coupon, 6, active: true, merchant: merchant)
       expect { create(:coupon, active: true, merchant: merchant) }.to raise_error(ActiveRecord::RecordInvalid)
       expect { create(:coupon, active: false, merchant: merchant) }.not_to raise_error
     end
 
     it 'returns an error when adding a duplicate coupon name' do
       merchant = create(:merchant)
-      coup1 = create(:coupon, name: "TEST DEAL", merchant: merchant)
-      expect { create(:coupon, name: "TEST DEAL", merchant: merchant) }.to raise_error(ActiveRecord::RecordInvalid)
-      expect { create(:coupon, name: "TEST DEAL 2", merchant: merchant) }.not_to raise_error
+      coup1 = create(:coupon, code: "TEST DEAL", merchant: merchant)
+      expect { create(:coupon, code: "TEST DEAL", merchant: merchant) }.to raise_error(ActiveRecord::RecordInvalid)
+      expect { create(:coupon, code: "TEST DEAL 2", merchant: merchant) }.not_to raise_error
     end
   end
 end
