@@ -25,7 +25,7 @@ class Api::V1::CouponsController < ApplicationController
 
     if coupon.nil?
       render json: { error: "No invoice found for this merchant" }, status: :unprocessable_entity
-    elsif coupon.save
+    elsif coupon.is_a?(Coupon) && coupon.save
       render json: CouponSerializer.new(coupon), status: :created
     else
       render json: { errors: coupon.errors.full_messages }, status: :unprocessable_entity
