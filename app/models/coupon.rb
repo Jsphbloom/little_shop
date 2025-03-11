@@ -3,10 +3,8 @@ class Coupon < ApplicationRecord
   has_one :invoice
   validates :name, :code, :discount_type, :discount_value, presence: true
   validates :code, presence: true, uniqueness: true
-  validate :active_coupon_limit, on: :create
+  validate :active_coupon_limit, on: [:create, :update]
   validate :unique_name, on: :create
-  # validate :single_coupon_per_invoice, on: :create
-
 
   def self.active_true
     where(active: true)
@@ -43,11 +41,3 @@ def unique_name
     errors.add(:name, "must be unique within a merchant's coupons.")
   end
 end
-
-# def single_coupon_per_invoice
-#   return unless invoice_id.present?
-
-#   if Invoice.exists?(invoice_id)
-#     errors.add(:invoice_id, "An invoice may only have ONE coupon.") if Invoice.find(invoice_id).coupon_id.present?
-#   end
-# end

@@ -1,7 +1,7 @@
 class Api::V1::CouponsController < ApplicationController
   rescue_from ActionController::ParameterMissing, with: :bad_request_response
   rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
-  # rescue_from ActiveRecord::RecordInvalid, with: :unprocessable_entity_response
+  rescue_from ActiveRecord::RecordInvalid, with: :unprocessable_entity_response
   def index
     coupon_list = Coupon.all
 
@@ -34,8 +34,15 @@ class Api::V1::CouponsController < ApplicationController
 
   def update
     coupon = Coupon.find(params[:id])
-    coupon.update!(active: !coupon.active)
-    render json: CouponSerializer.new(coupon)
+
+    new_active_status = !coupon.active
+
+    if new_active_status && coupon.merchant.coupons.where(active: true).count > 5
+      render json: { error: "A merchant can only have up to 5 active coupons." }, status: :unprocessable_entity
+    else
+      coupon.update!(active: !coupon.active)
+      render json: CouponSerializer.new(coupon)
+    end
   end
 
   private
@@ -52,4 +59,8 @@ class Api::V1::CouponsController < ApplicationController
     render json: ErrorSerializer.format_error(e, "404"), status: :not_found
   end
 
+  def unprocessable_entity_response(exception)
+    render json: { error: exception.record.errors.full_messages.join(', ') }, status: :unprocessable_entity
+  end
+  
 end
