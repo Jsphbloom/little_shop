@@ -18,7 +18,9 @@ class Coupon < ApplicationRecord
 
   def self.build(coupon_params)
     invoice = Invoice.find_by(merchant_id: coupon_params[:merchant_id])
-    # binding.pry
+
+    return nil unless invoice
+
     create(coupon_params.merge(invoice_id: invoice.id))
   end
 end

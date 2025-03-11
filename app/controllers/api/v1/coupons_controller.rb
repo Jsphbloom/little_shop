@@ -23,8 +23,12 @@ class Api::V1::CouponsController < ApplicationController
   def create
     coupon = Coupon.build(coupon_params)
 
-    if coupon.save!
-      render json: CouponSerializer.new(coupon)
+    if coupon.nil?
+      render json: { error: "No invoice found for this merchant" }, status: :unprocessable_entity
+    elsif coupon.save
+      render json: CouponSerializer.new(coupon), status: :created
+    else
+      render json: { errors: coupon.errors.full_messages }, status: :unprocessable_entity
     end
   end
 

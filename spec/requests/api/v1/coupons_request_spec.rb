@@ -78,13 +78,14 @@ RSpec.describe "Coupons API", type: :request do
     describe "POST /api/v1/coupons" do
       it "can create a coupon" do
         merchant = create(:merchant)
-        coupon_params = {name: Faker::Commerce.vendor, code: "BOGO50", discount_type: "dollar", discount_value: 50.0, merchant_id: merchant.id, active: true}
+        invoice = create(:invoice, merchant: merchant)
+        coupon_params = {name: Faker::Commerce.vendor, code: "BOGO50", discount_type: "dollar", discount_value: 50.0, merchant_id: merchant.id, invoice_id: invoice.id, active: true}
         headers = {"CONTENT_TYPE" => "application/json"}
 
         post "/api/v1/coupons", headers: headers, params: JSON.generate(coupon: coupon_params)
 
         expect(response).to be_successful
-        expect(response.status).to eq(200)
+        expect(response.status).to eq(201)
 
         created_coupon = Coupon.last
 
