@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   post "/api/v1/items", to: "api/v1/items#create"
   put "/api/v1/items/:id", to: "api/v1/items#update"
   delete "/api/v1/items/:id", to: "api/v1/items#destroy"
+  get "/api/v1/merchants/:merchant_id/coupons", to: "api/v1/merchant/coupons#index"
 
   get "/api/v1/merchants/find", to: "api/v1/merchants#find"
   get "/api/v1/merchants/find_all", to: "api/v1/merchants#find_all"
@@ -30,8 +31,6 @@ Rails.application.routes.draw do
 
   get "/api/v1/merchants/:merchant_id/customers", to: "api/v1/merchant/customers#index"
   get "/api/v1/merchants/:merchant_id/invoices", to: "api/v1/merchant/invoices#index"
-  get "/api/v1/merchants/:merchant_id/coupons", to: "api/v1/merchant/coupons#index"
-
 
   get "/api/v1/coupons", to: "api/v1/coupons#index"
   get "/api/v1/coupons/:id", to: "api/v1/coupons#show"

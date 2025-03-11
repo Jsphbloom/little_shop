@@ -35,11 +35,11 @@ class Merchant < ApplicationRecord
   end
 
   def self.with_coupons_count
-  left_joins(coupons: :invoice)
-    .select("merchants.id, merchants.name,
-              COUNT(coupons.id) AS coupons_count,
-              COUNT(invoices.id) AS invoice_coupon_count")
-    .group("merchants.id, merchants.name")
-    .order("merchants.id")
+    select("merchants.id, merchants.name,
+      COUNT(DISTINCT coupons.id) AS coupons_count,
+      COUNT(DISTINCT invoices.id) AS invoice_coupon_count")
+      .left_joins(:coupons)
+      .left_joins(coupons: :invoice)
+      .group("merchants.id, merchants.name")
   end
 end

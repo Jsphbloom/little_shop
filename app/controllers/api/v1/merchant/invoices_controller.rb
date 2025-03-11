@@ -3,9 +3,11 @@ class Api::V1::Merchant::InvoicesController < ApplicationController
   def index
     merchant = Merchant.find(params[:merchant_id])
     invoices = merchant.invoices
+
     if params[:status].present? &&
         ["shipped", "returned", "packaged"].include?(params[:status])
       invoices = invoices.filter_by_status(params[:status])
+
     end
     render json: InvoiceSerializer.new(invoices)
   end

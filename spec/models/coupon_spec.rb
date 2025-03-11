@@ -29,6 +29,44 @@ describe Coupon, type: :model do
         expect(Coupon.active_false).to eq([coup4, coup5])
       end
     end
+
+    describe "build coupon" do
+      let!(:merchant) { create(:merchant) }
+      let!(:invoice) { create(:invoice, merchant: merchant) }
+      let(:coupon_params) do
+        {
+          name: Faker::Commerce.product_name,
+          code: "TESTCODE123",
+          discount_type: "percentage",
+          discount_value: 25.0,
+          merchant_id: merchant.id,
+          invoice_id: invoice.id,
+          active: true
+        }
+      end
+      it "can create a coupon" do
+
+        coupon = Coupon.build(coupon_params)
+
+        expect(coupon).to be_a(Coupon)
+        expect(coupon.name).to eq(coupon_params[:name])
+        expect(coupon.discount_value).to eq(coupon_params[:discount_value])
+        expect(coupon.invoice_id).to eq(invoice.id)
+      end
+      it 'updates the invoice with the coupon_id' do
+      coupon = Coupon.build(coupon_params)
+
+      invoice.reload
+      expect(invoice.coupon_id).to eq(coupon.id)
+      end
+
+      it 'returns nil if no invoice is found' do
+        coupon_params[:invoice_id] = 99999
+        coupon = Coupon.build(coupon_params)
+
+        expect(coupon).to be_nil
+      end
+    end
   end
 
   describe 'sad paths' do
