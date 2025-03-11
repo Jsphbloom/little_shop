@@ -27,11 +27,6 @@ class Api::V1::CouponsController < ApplicationController
       invoice = Invoice.find_by(id: params[:invoice_id])
     end
 
-    if invoice.nil?
-      return render json: ErrorSerializer.format_error("Invoice not found.", "404"), status: :not_found
-    end
-    coupon.invoice = invoice
-
     if coupon.save!
       render json: CouponSerializer.new(coupon)
     end

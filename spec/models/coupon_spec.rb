@@ -2,7 +2,7 @@ require "rails_helper"
 
 describe Coupon, type: :model do
   describe "relationships" do
-    it { is_expected.to have_many :invoices }
+    it { is_expected.to have_one :invoice }
     it { is_expected.to belong_to :merchant }
   end
 
