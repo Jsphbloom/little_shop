@@ -15,8 +15,13 @@ class Coupon < ApplicationRecord
   def self.active_false
     where(active: false)
   end
-end
 
+  def self.build(coupon_params)
+    invoice = Invoice.find_by(merchant_id: coupon_params[:merchant_id])
+    # binding.pry
+    create(coupon_params.merge(invoice_id: invoice.id))
+  end
+end
 
 private
 

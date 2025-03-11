@@ -21,11 +21,7 @@ class Api::V1::CouponsController < ApplicationController
   end
 
   def create
-    coupon = Coupon.create(coupon_params)
-
-    if params[:invoice_id].present?
-      invoice = Invoice.find_by(id: params[:invoice_id])
-    end
+    coupon = Coupon.build(coupon_params)
 
     if coupon.save!
       render json: CouponSerializer.new(coupon)

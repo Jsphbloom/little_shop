@@ -29,6 +29,13 @@ describe Coupon, type: :model do
         expect(Coupon.active_false).to eq([coup4, coup5])
       end
     end
+
+    describe "build coupon" do
+      it "can create a coupon" do
+        create(:coupon)
+        expect(Coupon.all.length).to eq(1)
+      end
+    end
   end
 
   describe 'sad paths' do
