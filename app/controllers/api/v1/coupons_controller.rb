@@ -21,6 +21,10 @@ class Api::V1::CouponsController < ApplicationController
 
   def create
     coupon = Coupon.create(coupon_params)
+    if params[:invoice_id].present?
+      invoice = Invoice.find_by(id: params[:invoice_id])
+      invoice.update!(coupon: coupon) if invoice
+    end
     render json: CouponSerializer.new(coupon)
   end
 
@@ -33,7 +37,7 @@ class Api::V1::CouponsController < ApplicationController
   private
 
   def coupon_params
-    params.require(:coupon).permit(:name, :code, :discount_type, :discount_value, :merchant_id, :active)
+    params.require(:coupon).permit(:name, :code, :discount_type, :discount_value, :merchant_id, :invoice_id, :active, :times_used)
   end
 
   def bad_request_response(e)
