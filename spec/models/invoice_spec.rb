@@ -15,7 +15,7 @@ describe Invoice, type: :model do
         create_list(:invoice, 30, status: "packaged")
         create_list(:invoice, 20, status: "shipped")
 
-        expect(Invoice.filter_by_status("returned")).to eq(invoices)
+        expect(Invoice.filter_by_status("returned").to_a).to match_array(invoices)
       end
     end
   end
