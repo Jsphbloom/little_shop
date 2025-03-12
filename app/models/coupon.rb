@@ -38,6 +38,6 @@ end
 def unique_name
   return unless merchant
   if merchant.coupons.where(code: code).exists?
-    errors.add(:name, "must be unique within a merchant's coupons.")
+    errors.add(:code, "must be unique within a merchant's coupons.")
   end
 end
